@@ -1,0 +1,6608 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta
+    name="viewport"
+    content="width=device-width,initial-scale=1,viewport-fit=cover"
+  >
+  <meta name="theme-color" content="#10121a">
+  <title>MTZ Aurora Studio V6</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+
+  <style>
+    :root {
+      color-scheme: dark;
+
+      --bg: #080a10;
+      --bg-soft: #10131d;
+      --panel: rgba(20, 23, 34, .9);
+      --panel-solid: #161923;
+      --panel-light: rgba(35, 39, 54, .82);
+      --border: rgba(174, 184, 255, .14);
+      --border-active: rgba(255, 132, 60, .7);
+
+      --text: #f3f5fb;
+      --muted: #9ca5b8;
+
+      --orange: #ff6a00;
+      --orange-2: #ff9a3d;
+      --purple: #8b5cf6;
+      --purple-2: #c65cff;
+      --blue: #38bdf8;
+      --cyan: #32e6d2;
+      --green: #42d99c;
+      --red: #ff5361;
+      --yellow: #ffc857;
+
+      --accent: #ff6a00;
+      --accent-rgb: 255, 106, 0;
+
+      --radius: 13px;
+      --radius-small: 9px;
+      --shadow: 0 20px 60px rgba(0, 0, 0, .4);
+
+      --xml-name: #4ec9b0;
+      --xml-attr: #9cdcfe;
+      --xml-string: #ce9178;
+      --xml-comment: #6a9955;
+      --xml-special: #dcdcaa;
+      --xml-punctuation: #808080;
+      --xml-entity: #c586c0;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+    }
+
+    body {
+      position: relative;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr) auto;
+      min-height: 100vh;
+      min-height: 100dvh;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 15% 10%, rgba(139, 92, 246, .14), transparent 34%),
+        radial-gradient(circle at 85% 20%, rgba(56, 189, 248, .1), transparent 31%),
+        radial-gradient(circle at 50% 100%, rgba(255, 106, 0, .08), transparent 40%),
+        var(--bg);
+      color: var(--text);
+      font: 14px/1.45 Inter, ui-sans-serif, system-ui, -apple-system,
+        BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body::before,
+    body::after {
+      position: fixed;
+      z-index: -1;
+      width: 420px;
+      height: 420px;
+      border-radius: 50%;
+      filter: blur(110px);
+      pointer-events: none;
+      content: "";
+      opacity: .22;
+    }
+
+    body::before {
+      top: -180px;
+      left: -120px;
+      background: linear-gradient(135deg, var(--purple), var(--blue));
+    }
+
+    body::after {
+      right: -160px;
+      bottom: -190px;
+      background: linear-gradient(135deg, var(--orange), var(--purple-2));
+    }
+
+    button,
+    input,
+    textarea,
+    select {
+      font: inherit;
+    }
+
+    button {
+      position: relative;
+      min-height: 39px;
+      padding: 8px 11px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      background: linear-gradient(145deg, rgba(50, 55, 72, .85), rgba(31, 35, 47, .9));
+      color: var(--text);
+      cursor: pointer;
+      touch-action: manipulation;
+      transition:
+        border-color .16s ease,
+        transform .16s ease,
+        box-shadow .16s ease,
+        background .16s ease;
+    }
+
+    button::before {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        115deg,
+        transparent 10%,
+        rgba(255, 255, 255, .1) 46%,
+        transparent 78%
+      );
+      content: "";
+      opacity: 0;
+      transform: translateX(-80%);
+      transition: .35s ease;
+    }
+
+    button:hover:not(:disabled) {
+      border-color: rgba(var(--accent-rgb), .68);
+      box-shadow: 0 8px 25px rgba(var(--accent-rgb), .12);
+      transform: translateY(-1px);
+    }
+
+    button:hover:not(:disabled)::before {
+      opacity: 1;
+      transform: translateX(80%);
+    }
+
+    button:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+
+    button:disabled {
+      opacity: .4;
+      cursor: not-allowed;
+    }
+
+    button.primary,
+    button.success {
+      border-color: transparent;
+      background:
+        linear-gradient(135deg, var(--orange), var(--purple));
+      color: #fff;
+      font-weight: 780;
+      box-shadow: 0 8px 24px rgba(139, 92, 246, .18);
+    }
+
+    button.success {
+      background:
+        linear-gradient(135deg, #1fb980, #3d8dff);
+    }
+
+    button.danger {
+      border-color: rgba(255, 83, 97, .38);
+      background: linear-gradient(145deg, #59242c, #3d2027);
+      color: #fff;
+    }
+
+    button.small {
+      min-height: 31px;
+      padding: 5px 8px;
+      font-size: 11px;
+    }
+
+    input,
+    textarea,
+    select {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      outline: 0;
+      background: rgba(10, 12, 18, .82);
+      color: var(--text);
+      transition: .15s ease;
+    }
+
+    input,
+    select {
+      min-height: 40px;
+      padding: 8px 10px;
+    }
+
+    textarea {
+      padding: 12px;
+      resize: vertical;
+      tab-size: 2;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+      border-color: rgba(var(--accent-rgb), .8);
+      box-shadow: 0 0 0 3px rgba(var(--accent-rgb), .12);
+    }
+
+    input[type="range"] {
+      min-height: 28px;
+      accent-color: var(--accent);
+    }
+
+    img,
+    video,
+    canvas {
+      max-width: 100%;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .topbar {
+      position: relative;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 65px;
+      padding:
+        max(10px, env(safe-area-inset-top))
+        max(12px, env(safe-area-inset-right))
+        10px
+        max(12px, env(safe-area-inset-left));
+      overflow: hidden;
+      border-bottom: 1px solid var(--border);
+      background: rgba(17, 19, 28, .86);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, .3);
+      backdrop-filter: blur(24px) saturate(150%);
+    }
+
+    .topbar::before {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(
+          90deg,
+          rgba(255, 106, 0, .08),
+          rgba(139, 92, 246, .08),
+          rgba(56, 189, 248, .06)
+        );
+      content: "";
+      pointer-events: none;
+    }
+
+    .brand {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin-right: 4px;
+      white-space: nowrap;
+      font-size: 17px;
+      font-weight: 850;
+    }
+
+    .brand-logo {
+      position: relative;
+      display: grid;
+      place-items: center;
+      width: 41px;
+      height: 41px;
+      border-radius: 13px;
+      background:
+        linear-gradient(135deg, var(--orange), var(--purple));
+      color: #fff;
+      font-size: 11px;
+      font-weight: 900;
+      box-shadow:
+        0 8px 25px rgba(139, 92, 246, .28),
+        inset 0 1px 0 rgba(255, 255, 255, .3);
+    }
+
+    .brand-logo::after {
+      position: absolute;
+      inset: -3px;
+      z-index: -1;
+      border-radius: 16px;
+      background:
+        linear-gradient(135deg, var(--orange), var(--purple), var(--blue));
+      content: "";
+      opacity: .35;
+      filter: blur(8px);
+    }
+
+    .brand-version {
+      display: block;
+      color: var(--muted);
+      font-size: 9px;
+      font-weight: 550;
+      letter-spacing: .6px;
+      text-transform: uppercase;
+    }
+
+    .toolbar-group {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .toolbar-spacer {
+      flex: 1;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: 285px minmax(0, 1fr) 305px;
+      min-width: 0;
+      min-height: 0;
+      transition: grid-template-columns .25s ease;
+    }
+
+    .workspace.archive-mode {
+      grid-template-columns: 330px minmax(0, 1fr);
+    }
+
+    .workspace.archive-mode .inspector {
+      display: none;
+    }
+
+    .sidebar,
+    .main,
+    .inspector,
+    .editor,
+    .panel,
+    .panel-body {
+      min-width: 0;
+      max-width: 100%;
+    }
+
+    .sidebar {
+      display: grid;
+      grid-template-rows: auto auto auto minmax(0, 1fr);
+      border-right: 1px solid var(--border);
+      background: rgba(16, 18, 27, .88);
+      backdrop-filter: blur(22px);
+    }
+
+    .view-switch {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      padding: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .view-switch button {
+      min-width: 0;
+      min-height: 37px;
+      padding: 6px;
+      font-size: 11px;
+    }
+
+    .view-switch button.active {
+      border-color: transparent;
+      background:
+        linear-gradient(135deg, rgba(255, 106, 0, .8), rgba(139, 92, 246, .8));
+      box-shadow: 0 8px 22px rgba(139, 92, 246, .18);
+    }
+
+    .sidebar-search {
+      padding: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .studio-sections {
+      display: flex;
+      gap: 5px;
+      padding: 7px;
+      overflow-x: auto;
+      border-bottom: 1px solid var(--border);
+      scrollbar-width: thin;
+    }
+
+    .studio-sections button {
+      flex: 0 0 auto;
+      min-height: 32px;
+      padding: 5px 9px;
+      border-radius: 999px;
+      font-size: 10px;
+      white-space: nowrap;
+    }
+
+    .studio-sections button.active {
+      border-color: rgba(var(--section-rgb, 255, 106, 0), .65);
+      background:
+        linear-gradient(
+          135deg,
+          rgba(var(--section-rgb, 255, 106, 0), .35),
+          rgba(139, 92, 246, .22)
+        );
+      box-shadow:
+        0 6px 18px rgba(var(--section-rgb, 255, 106, 0), .12);
+    }
+
+    .navigator {
+      min-height: 0;
+      overflow: auto;
+      padding: 6px 4px 24px;
+      overscroll-behavior: contain;
+      user-select: none;
+    }
+
+    .navigator-empty {
+      padding: 25px 16px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .tree-row,
+    .studio-row {
+      position: relative;
+      display: flex;
+      align-items: center;
+      min-height: 34px;
+      margin: 2px 3px;
+      padding-right: 8px;
+      overflow: hidden;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .studio-row {
+      min-width: 0;
+      padding: 7px;
+    }
+
+    .tree-row::before,
+    .studio-row::before {
+      position: absolute;
+      top: 7px;
+      bottom: 7px;
+      left: 0;
+      width: 3px;
+      border-radius: 0 4px 4px 0;
+      background: linear-gradient(var(--orange), var(--purple));
+      content: "";
+      opacity: 0;
+      transform: scaleY(.3);
+      transition: .16s ease;
+    }
+
+    .tree-row:hover,
+    .studio-row:hover {
+      background:
+        linear-gradient(
+          90deg,
+          rgba(var(--accent-rgb), .08),
+          rgba(139, 92, 246, .035)
+        );
+    }
+
+    .tree-row.selected,
+    .studio-row.selected {
+      background:
+        linear-gradient(
+          90deg,
+          rgba(var(--accent-rgb), .18),
+          rgba(139, 92, 246, .08)
+        );
+    }
+
+    .tree-row.selected::before,
+    .studio-row.selected::before {
+      opacity: 1;
+      transform: scaleY(1);
+    }
+
+    .tree-toggle {
+      display: grid;
+      place-items: center;
+      flex: 0 0 24px;
+      width: 24px;
+      min-height: 24px;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+    }
+
+    .node-icon {
+      flex: 0 0 25px;
+      width: 25px;
+      text-align: center;
+    }
+
+    .node-name {
+      max-width: 225px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .studio-row-content {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .studio-row-name {
+      overflow: hidden;
+      font-size: 12px;
+      font-weight: 700;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .studio-row-path {
+      overflow: hidden;
+      color: var(--muted);
+      font-size: 9px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .modified-dot {
+      flex: 0 0 7px;
+      width: 7px;
+      height: 7px;
+      margin-left: 6px;
+      border-radius: 50%;
+      background: var(--orange);
+      box-shadow: 0 0 9px var(--orange);
+    }
+
+    .main {
+      display: grid;
+      grid-template-rows: auto auto minmax(0, 1fr);
+      background:
+        linear-gradient(145deg, rgba(8, 10, 16, .82), rgba(13, 15, 24, .92));
+    }
+
+    .open-tabs {
+      display: flex;
+      min-height: 39px;
+      overflow-x: auto;
+      border-bottom: 1px solid var(--border);
+      background: rgba(10, 12, 18, .8);
+      scrollbar-width: thin;
+    }
+
+    .open-tab {
+      position: relative;
+      display: flex;
+      align-items: center;
+      flex: 0 0 auto;
+      gap: 6px;
+      max-width: 210px;
+      min-height: 38px;
+      padding: 0 5px 0 10px;
+      border: 0;
+      border-right: 1px solid var(--border);
+      border-radius: 0;
+      background: rgba(19, 21, 30, .78);
+      cursor: pointer;
+    }
+
+    .open-tab::after {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--orange), var(--purple), var(--blue));
+      content: "";
+      opacity: 0;
+      transform: scaleX(.25);
+      transition: .18s ease;
+    }
+
+    .open-tab.active {
+      background:
+        linear-gradient(180deg, rgba(40, 44, 58, .78), rgba(22, 24, 34, .9));
+    }
+
+    .open-tab.active::after {
+      opacity: 1;
+      transform: scaleX(1);
+    }
+
+    .open-tab-name {
+      max-width: 145px;
+      overflow: hidden;
+      font-size: 11px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .tab-close {
+      display: grid;
+      place-items: center;
+      width: 22px;
+      height: 22px;
+      min-height: 22px;
+      padding: 0;
+      border: 0;
+      border-radius: 5px;
+      background: transparent;
+      color: var(--muted);
+    }
+
+    .file-head {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 7px;
+      min-height: 58px;
+      padding: 9px 13px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(18, 20, 29, .72);
+      backdrop-filter: blur(16px);
+    }
+
+    .file-info {
+      min-width: 0;
+      flex: 1 1 220px;
+    }
+
+    .file-title {
+      overflow: hidden;
+      font-size: 15px;
+      font-weight: 800;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .file-path {
+      overflow: hidden;
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 10px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .editor {
+      min-height: 0;
+      overflow: auto;
+      padding: clamp(8px, 1.4vw, 15px);
+    }
+
+    .inspector {
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      border-left: 1px solid var(--border);
+      background: rgba(16, 18, 27, .88);
+      backdrop-filter: blur(22px);
+    }
+
+    .inspector-head {
+      position: relative;
+      padding: 12px;
+      overflow: hidden;
+      border-bottom: 1px solid var(--border);
+      font-weight: 800;
+    }
+
+    .inspector-head::before {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(
+          120deg,
+          rgba(var(--accent-rgb), .14),
+          rgba(139, 92, 246, .08),
+          transparent
+        );
+      content: "";
+      pointer-events: none;
+    }
+
+    .inspector-body {
+      min-height: 0;
+      overflow: auto;
+      padding: 10px;
+    }
+
+    .inspector-section {
+      position: relative;
+      margin-bottom: 10px;
+      padding: 10px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      background:
+        linear-gradient(
+          145deg,
+          rgba(34, 38, 52, .62),
+          rgba(17, 19, 28, .82)
+        );
+    }
+
+    .inspector-section::after {
+      position: absolute;
+      top: -45px;
+      right: -45px;
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: rgba(var(--accent-rgb), .12);
+      content: "";
+      filter: blur(18px);
+      pointer-events: none;
+    }
+
+    .inspector-section h3 {
+      position: relative;
+      margin: 0 0 9px;
+      font-size: 12px;
+    }
+
+    .control-row {
+      position: relative;
+      margin-bottom: 9px;
+    }
+
+    .control-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .control-label {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 4px;
+      color: var(--muted);
+      font-size: 10px;
+    }
+
+    .empty-state {
+      display: grid;
+      place-items: center;
+      min-height: 100%;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .empty-card,
+    .panel {
+      position: relative;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(
+          145deg,
+          rgba(30, 34, 47, .76),
+          rgba(17, 19, 28, .9)
+        );
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
+    }
+
+    .empty-card {
+      width: min(620px, 100%);
+      padding: 30px;
+      overflow: hidden;
+    }
+
+    .empty-card::before,
+    .panel::before {
+      position: absolute;
+      top: 0;
+      right: 12%;
+      left: 12%;
+      height: 1px;
+      background:
+        linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, .38),
+          transparent
+        );
+      content: "";
+      pointer-events: none;
+    }
+
+    .empty-card::after {
+      position: absolute;
+      top: -100px;
+      right: -80px;
+      width: 260px;
+      height: 260px;
+      border-radius: 50%;
+      background:
+        linear-gradient(135deg, rgba(255, 106, 0, .24), rgba(139, 92, 246, .2));
+      content: "";
+      filter: blur(45px);
+      pointer-events: none;
+    }
+
+    .panel {
+      width: 100%;
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 7px;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      background:
+        linear-gradient(
+          90deg,
+          rgba(var(--accent-rgb), .08),
+          rgba(139, 92, 246, .04)
+        );
+    }
+
+    .panel-title {
+      flex: 1 1 180px;
+      min-width: 0;
+      font-weight: 800;
+    }
+
+    .panel-body {
+      padding: 12px;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 27px;
+      max-width: 100%;
+      padding: 4px 9px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: rgba(8, 10, 15, .62);
+      color: var(--muted);
+      font-size: 10px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .status-pill.ok {
+      border-color: rgba(66, 217, 156, .45);
+      color: var(--green);
+    }
+
+    .status-pill.error {
+      border-color: rgba(255, 83, 97, .5);
+      color: #ff818b;
+    }
+
+    .editor-toolbar,
+    .element-actions {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .editor-toolbar {
+      margin-bottom: 11px;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(165px, 1fr));
+      gap: 9px;
+    }
+
+    .dashboard-card {
+      position: relative;
+      min-width: 0;
+      padding: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      background:
+        linear-gradient(
+          145deg,
+          rgba(37, 41, 55, .66),
+          rgba(14, 16, 24, .88)
+        );
+    }
+
+    .dashboard-card::before {
+      position: absolute;
+      top: -35px;
+      right: -35px;
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background: rgba(var(--card-rgb, 139, 92, 246), .2);
+      content: "";
+      filter: blur(18px);
+    }
+
+    .dashboard-card h3 {
+      position: relative;
+      margin: 0 0 4px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 650;
+    }
+
+    .dashboard-value {
+      position: relative;
+      margin: 4px 0;
+      font-size: 25px;
+      font-weight: 850;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 9px;
+    }
+
+    .form-field {
+      min-width: 0;
+    }
+
+    .form-field.full {
+      grid-column: 1 / -1;
+    }
+
+    .form-field label {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .form-field textarea {
+      min-height: 100px;
+    }
+
+    .studio-stage {
+      position: relative;
+      display: grid;
+      place-items: center;
+      min-height: 660px;
+      padding: 25px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background:
+        radial-gradient(circle at 50% 40%, rgba(var(--accent-rgb), .12), transparent 35%),
+        radial-gradient(circle at 20% 10%, rgba(139, 92, 246, .1), transparent 32%),
+        linear-gradient(145deg, rgba(20, 23, 34, .8), rgba(9, 11, 17, .94));
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .04);
+    }
+
+    .studio-stage::before,
+    .studio-stage::after {
+      position: absolute;
+      width: 360px;
+      height: 360px;
+      border-radius: 50%;
+      content: "";
+      filter: blur(80px);
+      pointer-events: none;
+    }
+
+    .studio-stage::before {
+      top: -180px;
+      left: -100px;
+      background: rgba(139, 92, 246, .18);
+    }
+
+    .studio-stage::after {
+      right: -170px;
+      bottom: -180px;
+      background: rgba(var(--accent-rgb), .18);
+    }
+
+    .scene-tabs {
+      position: absolute;
+      z-index: 15;
+      top: 13px;
+      left: 50%;
+      display: flex;
+      gap: 5px;
+      max-width: calc(100% - 24px);
+      padding: 5px;
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: rgba(9, 11, 17, .72);
+      backdrop-filter: blur(18px);
+      transform: translateX(-50%);
+    }
+
+    .scene-tabs button {
+      flex: 0 0 auto;
+      min-height: 31px;
+      padding: 5px 9px;
+      border: 0;
+      border-radius: 999px;
+      background: transparent;
+      font-size: 10px;
+      white-space: nowrap;
+    }
+
+    .scene-tabs button.active {
+      background:
+        linear-gradient(135deg, rgba(var(--accent-rgb), .85), rgba(139, 92, 246, .85));
+      box-shadow: 0 5px 16px rgba(var(--accent-rgb), .18);
+    }
+
+    .phone-wrap {
+      position: relative;
+      z-index: 5;
+      margin-top: 35px;
+    }
+
+    .phone-glow {
+      position: absolute;
+      inset: 12% -25% -8%;
+      z-index: -1;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle, rgba(var(--accent-rgb), .3), rgba(139, 92, 246, .08), transparent 70%);
+      filter: blur(35px);
+    }
+
+    .phone {
+      position: relative;
+      width: 294px;
+      aspect-ratio: 9 / 19.5;
+      padding: 8px;
+      border: 1px solid rgba(255, 255, 255, .22);
+      border-radius: var(--device-radius, 35px);
+      background:
+        linear-gradient(145deg, #343844, #050608 40%, #20232b);
+      box-shadow:
+        0 35px 90px rgba(0, 0, 0, .65),
+        inset 0 1px 0 rgba(255, 255, 255, .35);
+      transition: .22s ease;
+    }
+
+    .phone::before {
+      position: absolute;
+      inset: 3px;
+      border: 1px solid rgba(255, 255, 255, .08);
+      border-radius: calc(var(--device-radius, 35px) - 4px);
+      content: "";
+      pointer-events: none;
+    }
+
+    .phone-screen {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      border-radius: calc(var(--device-radius, 35px) - 9px);
+      background:
+        radial-gradient(circle at 70% 20%, #65318d, transparent 40%),
+        linear-gradient(160deg, #1d345d, #17131e 60%, #050608);
+      color: #fff;
+      isolation: isolate;
+    }
+
+    .wallpaper-layer {
+      position: absolute;
+      inset: 0;
+      z-index: -4;
+      background-position: center;
+      background-size: cover;
+    }
+
+    .wallpaper-before {
+      filter: blur(var(--preview-blur, 0px));
+    }
+
+    .wallpaper-after {
+      width: var(--compare-width, 100%);
+      overflow: hidden;
+      border-right: 1px solid rgba(255, 255, 255, .8);
+      filter: blur(var(--preview-blur, 0px));
+    }
+
+    .wallpaper-after-inner {
+      width: 278px;
+      height: 100%;
+      background-position: center;
+      background-size: cover;
+    }
+
+    .screen-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: -2;
+      background: rgba(0, 0, 0, var(--overlay-opacity, .1));
+      pointer-events: none;
+    }
+
+    .phone-notch {
+      position: absolute;
+      z-index: 20;
+      top: 8px;
+      left: 50%;
+      width: 81px;
+      height: 22px;
+      border-radius: 0 0 15px 15px;
+      background: #030405;
+      transform: translateX(-50%);
+    }
+
+    .phone-status {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      justify-content: space-between;
+      padding: 13px 14px 0;
+      font-size: 10px;
+      font-weight: 700;
+      text-shadow: 0 1px 5px #000;
+    }
+
+    .scene {
+      position: absolute;
+      inset: 0;
+      display: none;
+    }
+
+    .scene.active {
+      display: block;
+    }
+
+    .lock-clock {
+      margin-top: 72px;
+      text-align: center;
+      text-shadow: 0 4px 18px rgba(0, 0, 0, .55);
+    }
+
+    .lock-time {
+      font-size: var(--clock-size, 48px);
+      font-weight: 260;
+      letter-spacing: -3px;
+    }
+
+    .lock-date {
+      margin-top: -4px;
+      font-size: 12px;
+    }
+
+    .notification-card {
+      margin: 35px 14px 0;
+      padding: 11px;
+      border: 1px solid rgba(255, 255, 255, .16);
+      border-radius: var(--card-radius, 17px);
+      background: rgba(255, 255, 255, .14);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, .2);
+      backdrop-filter: blur(18px);
+    }
+
+    .notification-title {
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .notification-text {
+      margin-top: 3px;
+      font-size: 9px;
+      opacity: .85;
+    }
+
+    .home-clock {
+      margin: 52px 15px 0;
+      font-size: 29px;
+      font-weight: 300;
+      text-shadow: 0 3px 12px #000;
+    }
+
+    .home-date {
+      margin: -2px 15px 0;
+      font-size: 10px;
+      text-shadow: 0 2px 8px #000;
+    }
+
+    .phone-icons {
+      position: absolute;
+      right: 14px;
+      bottom: 76px;
+      left: 14px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 13px 8px;
+    }
+
+    .phone-icon {
+      display: grid;
+      justify-items: center;
+      gap: 3px;
+      min-width: 0;
+    }
+
+    .phone-icon img {
+      width: var(--icon-size, 41px);
+      height: var(--icon-size, 41px);
+      object-fit: contain;
+      border-radius: calc(var(--icon-size, 41px) * .23);
+      filter: drop-shadow(0 4px 6px rgba(0, 0, 0, .45));
+    }
+
+    .phone-icon span {
+      width: 100%;
+      overflow: hidden;
+      font-size: 7px;
+      text-align: center;
+      text-overflow: ellipsis;
+      text-shadow: 0 1px 4px #000;
+      white-space: nowrap;
+    }
+
+    .phone-dock {
+      position: absolute;
+      right: 14px;
+      bottom: 13px;
+      left: 14px;
+      height: 54px;
+      border: 1px solid rgba(255, 255, 255, .14);
+      border-radius: calc(var(--card-radius, 17px) + 2px);
+      background: rgba(255, 255, 255, .13);
+      backdrop-filter: blur(16px);
+    }
+
+    .control-center {
+      margin: 45px 13px 0;
+      padding: 10px;
+      border: 1px solid rgba(255, 255, 255, .17);
+      border-radius: var(--card-radius, 17px);
+      background: rgba(255, 255, 255, .13);
+      backdrop-filter: blur(22px);
+    }
+
+    .control-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .control-tile {
+      min-height: 72px;
+      padding: 10px;
+      border-radius: calc(var(--card-radius, 17px) - 4px);
+      background: rgba(255, 255, 255, .12);
+      font-size: 9px;
+    }
+
+    .control-tile.active {
+      background:
+        linear-gradient(
+          135deg,
+          rgba(var(--accent-rgb), .9),
+          rgba(139, 92, 246, .8)
+        );
+    }
+
+    .control-circle {
+      display: grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+      margin-bottom: 7px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .18);
+      font-size: 13px;
+    }
+
+    .notifications-scene {
+      padding: 52px 13px 0;
+    }
+
+    .notifications-scene .notification-card {
+      margin: 8px 0 0;
+    }
+
+    .aod-scene {
+      display: none;
+      background: #000;
+    }
+
+    .aod-scene.active {
+      display: block;
+    }
+
+    .aod-content {
+      margin-top: 130px;
+      text-align: center;
+    }
+
+    .aod-time {
+      background:
+        linear-gradient(135deg, var(--orange), var(--purple-2), var(--blue));
+      background-clip: text;
+      color: transparent;
+      font-size: var(--clock-size, 48px);
+      font-weight: 250;
+      letter-spacing: -3px;
+    }
+
+    .aod-date {
+      color: #999;
+      font-size: 10px;
+    }
+
+    .compare-control {
+      position: absolute;
+      z-index: 20;
+      right: 12px;
+      bottom: 12px;
+      left: 12px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 8px;
+      border: 1px solid rgba(255, 255, 255, .15);
+      border-radius: 999px;
+      background: rgba(5, 6, 9, .68);
+      backdrop-filter: blur(15px);
+    }
+
+    .compare-control span {
+      font-size: 8px;
+      white-space: nowrap;
+    }
+
+    .compare-control input {
+      min-height: 20px;
+    }
+
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
+      gap: 8px;
+    }
+
+    .gallery-card {
+      position: relative;
+      min-width: 0;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      background:
+        linear-gradient(
+          145deg,
+          rgba(35, 39, 53, .65),
+          rgba(14, 16, 23, .9)
+        );
+      transition: .17s ease;
+    }
+
+    .gallery-card::before {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      border-radius: inherit;
+      background:
+        linear-gradient(
+          135deg,
+          rgba(var(--accent-rgb), .12),
+          transparent 35%,
+          rgba(139, 92, 246, .08)
+        );
+      content: "";
+      opacity: 0;
+      pointer-events: none;
+      transition: .17s ease;
+    }
+
+    .gallery-card:hover {
+      border-color: rgba(var(--accent-rgb), .5);
+      transform: translateY(-2px);
+    }
+
+    .gallery-card:hover::before {
+      opacity: 1;
+    }
+
+    .gallery-image {
+      display: grid;
+      place-items: center;
+      width: 100%;
+      height: 132px;
+      padding: 7px;
+      background:
+        linear-gradient(45deg, #20232c 25%, transparent 25%),
+        linear-gradient(-45deg, #20232c 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #20232c 75%),
+        linear-gradient(-45deg, transparent 75%, #20232c 75%);
+      background-color: #13151c;
+      background-size: 16px 16px;
+      background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+    }
+
+    .gallery-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .gallery-info {
+      padding: 8px;
+    }
+
+    .gallery-name {
+      overflow: hidden;
+      margin-bottom: 2px;
+      font-size: 12px;
+      font-weight: 750;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .gallery-path {
+      min-height: 27px;
+      overflow: hidden;
+      color: var(--muted);
+      font-size: 9px;
+      overflow-wrap: anywhere;
+    }
+
+    .gallery-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5px;
+      margin-top: 6px;
+    }
+
+    .gallery-actions button {
+      min-width: 0;
+      min-height: 31px;
+      padding: 4px;
+      font-size: 10px;
+    }
+
+    .component-list {
+      display: grid;
+      gap: 6px;
+    }
+
+    .component-row {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 8px;
+      padding: 8px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      background:
+        linear-gradient(
+          145deg,
+          rgba(34, 38, 51, .56),
+          rgba(14, 16, 23, .86)
+        );
+    }
+
+    .component-name {
+      overflow: hidden;
+      font-size: 12px;
+      font-weight: 700;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .component-path {
+      overflow: hidden;
+      color: var(--muted);
+      font-size: 9px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .component-actions {
+      display: flex;
+      gap: 5px;
+    }
+
+    .code-shell {
+      position: relative;
+      width: 100%;
+      height: min(65vh, 760px);
+      min-height: 430px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #0b0d12;
+      box-shadow: inset 0 0 35px rgba(0, 0, 0, .25);
+    }
+
+    .code-highlight,
+    .code-input {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 14px;
+      overflow: auto;
+      border: 0;
+      border-radius: 0;
+      outline: 0;
+      font: 13px/1.55 "SFMono-Regular", Consolas,
+        "Liberation Mono", monospace;
+      letter-spacing: 0;
+      tab-size: 2;
+      white-space: pre;
+      word-wrap: normal;
+    }
+
+    .code-highlight {
+      z-index: 1;
+      color: #d4d4d4;
+      pointer-events: none;
+      scrollbar-width: none;
+    }
+
+    .code-highlight::-webkit-scrollbar {
+      display: none;
+    }
+
+    .code-highlight code {
+      display: block;
+      min-width: max-content;
+      font: inherit;
+    }
+
+    .code-input {
+      z-index: 2;
+      resize: none;
+      background: transparent;
+      color: transparent;
+      caret-color: #fff;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .code-input::selection {
+      background: rgba(70, 120, 200, .55);
+    }
+
+    .code-shell.plain .code-highlight {
+      display: none;
+    }
+
+    .code-shell.plain .code-input {
+      background: #0b0d12;
+      color: var(--text);
+      -webkit-text-fill-color: var(--text);
+    }
+
+    .xml-name {
+      color: var(--xml-name);
+    }
+
+    .xml-attr {
+      color: var(--xml-attr);
+    }
+
+    .xml-string {
+      color: var(--xml-string);
+    }
+
+    .xml-comment {
+      color: var(--xml-comment);
+      font-style: italic;
+    }
+
+    .xml-special {
+      color: var(--xml-special);
+    }
+
+    .xml-punctuation {
+      color: var(--xml-punctuation);
+    }
+
+    .xml-entity {
+      color: var(--xml-entity);
+    }
+
+    .plain-editor {
+      min-height: 510px;
+      font: 13px/1.55 "SFMono-Regular", Consolas,
+        "Liberation Mono", monospace;
+      white-space: pre;
+    }
+
+    .xml-inspector {
+      display: grid;
+      gap: 8px;
+    }
+
+    .xml-element {
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      background: rgba(14, 16, 24, .76);
+    }
+
+    .xml-element-title {
+      padding: 8px 9px;
+      border-bottom: 1px solid var(--border);
+      background:
+        linear-gradient(90deg, rgba(var(--accent-rgb), .11), transparent);
+      color: var(--orange-2);
+      font: 11px/1.45 "SFMono-Regular", Consolas, monospace;
+      overflow-wrap: anywhere;
+    }
+
+    .xml-element-body {
+      padding: 9px;
+    }
+
+    .attribute-row {
+      display: grid;
+      grid-template-columns: minmax(120px, .5fr) minmax(180px, 1fr) auto;
+      gap: 6px;
+      margin-bottom: 7px;
+    }
+
+    .attribute-name {
+      color: #aeb7c7;
+      font-family: "SFMono-Regular", Consolas, monospace;
+    }
+
+    .leaf-text {
+      min-height: 80px;
+      font-family: "SFMono-Regular", Consolas, monospace;
+    }
+
+    .element-actions {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid var(--border);
+    }
+
+    .image-preview,
+    .compare-box {
+      position: relative;
+      display: grid;
+      place-items: center;
+      min-height: 320px;
+      overflow: hidden;
+      border-radius: 10px;
+      background:
+        linear-gradient(45deg, #20232b 25%, transparent 25%),
+        linear-gradient(-45deg, #20232b 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #20232b 75%),
+        linear-gradient(-45deg, transparent 75%, #20232b 75%);
+      background-color: #12141a;
+      background-size: 20px 20px;
+      background-position: 0 0, 0 10px, 10px -10px, -10px 0;
+    }
+
+    .compare-image {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+    }
+
+    .compare-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .compare-after {
+      right: auto;
+      width: 50%;
+      border-right: 2px solid #fff;
+    }
+
+    .compare-after img {
+      width: var(--compare-box-width, 700px);
+      max-width: none;
+    }
+
+    .compare-slider {
+      position: absolute;
+      right: 12px;
+      bottom: 12px;
+      left: 12px;
+      z-index: 10;
+      padding: 6px 9px;
+      border: 1px solid rgba(255, 255, 255, .15);
+      border-radius: 999px;
+      background: rgba(5, 6, 9, .7);
+      backdrop-filter: blur(15px);
+    }
+
+    .audio-preview,
+    .font-preview {
+      padding: 15px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background:
+        linear-gradient(
+          145deg,
+          rgba(34, 38, 51, .6),
+          rgba(13, 15, 22, .86)
+        );
+    }
+
+    .audio-preview audio {
+      width: 100%;
+    }
+
+    .font-sample {
+      min-height: 160px;
+      margin-top: 9px;
+      padding: 17px;
+      overflow-wrap: anywhere;
+      border-radius: 9px;
+      background: #fff;
+      color: #111;
+      font-size: 34px;
+      line-height: 1.25;
+    }
+
+    .color-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+      gap: 8px;
+    }
+
+    .color-card {
+      display: grid;
+      grid-template-columns: 43px minmax(0, 1fr);
+      align-items: center;
+      gap: 8px;
+      padding: 8px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      background:
+        linear-gradient(
+          145deg,
+          rgba(34, 38, 51, .6),
+          rgba(13, 15, 22, .86)
+        );
+    }
+
+    .color-card input[type="color"] {
+      width: 43px;
+      height: 43px;
+      min-height: 43px;
+      padding: 2px;
+    }
+
+    .hex-view {
+      width: 100%;
+      max-height: 470px;
+      margin: 0;
+      padding: 12px;
+      overflow: auto;
+      border-radius: 9px;
+      background: #090b10;
+      color: #c7cedb;
+      font: 11px/1.55 "SFMono-Regular", Consolas, monospace;
+    }
+
+    .statusbar {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      min-height: 31px;
+      padding:
+        5px
+        max(12px, env(safe-area-inset-right))
+        max(5px, env(safe-area-inset-bottom))
+        max(12px, env(safe-area-inset-left));
+      gap: 5px 10px;
+      border-top: 1px solid var(--border);
+      background: rgba(16, 18, 26, .9);
+      color: var(--muted);
+      font-size: 11px;
+      backdrop-filter: blur(16px);
+    }
+
+    .statusbar .right {
+      margin-left: auto;
+    }
+
+    .drop-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 500;
+      display: none;
+      place-items: center;
+      padding: 15px;
+      background: rgba(7, 8, 12, .84);
+      backdrop-filter: blur(12px);
+    }
+
+    .drop-overlay.active {
+      display: grid;
+    }
+
+    .drop-box {
+      position: relative;
+      width: min(580px, 100%);
+      padding: 50px 24px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, .18);
+      border-radius: 20px;
+      background:
+        linear-gradient(
+          145deg,
+          rgba(39, 43, 58, .86),
+          rgba(18, 20, 29, .94)
+        );
+      text-align: center;
+      box-shadow: var(--shadow);
+    }
+
+    .drop-box::before {
+      position: absolute;
+      inset: -3px;
+      z-index: -1;
+      border-radius: 23px;
+      background:
+        linear-gradient(135deg, var(--orange), var(--purple), var(--blue));
+      content: "";
+      filter: blur(10px);
+      opacity: .6;
+    }
+
+    .toast {
+      position: fixed;
+      right: 18px;
+      bottom: 48px;
+      z-index: 700;
+      max-width: min(430px, calc(100vw - 36px));
+      padding: 11px 14px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background:
+        linear-gradient(
+          145deg,
+          rgba(43, 47, 62, .96),
+          rgba(22, 24, 34, .98)
+        );
+      color: #fff;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      transform: translateY(12px);
+      pointer-events: none;
+      transition: .2s ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .toast.error {
+      border-color: var(--red);
+    }
+
+    dialog {
+      width: min(650px, calc(100vw - 24px));
+      max-height: min(92vh, 860px);
+      padding: 0;
+      overflow: auto;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background:
+        linear-gradient(
+          145deg,
+          rgba(33, 37, 50, .97),
+          rgba(16, 18, 27, .99)
+        );
+      color: var(--text);
+      box-shadow: 0 35px 100px rgba(0, 0, 0, .75);
+    }
+
+    dialog::backdrop {
+      background: rgba(0, 0, 0, .76);
+      backdrop-filter: blur(7px);
+    }
+
+    .dialog-head {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      background:
+        linear-gradient(
+          90deg,
+          rgba(255, 106, 0, .15),
+          rgba(139, 92, 246, .1),
+          rgba(20, 23, 33, .95)
+        );
+      backdrop-filter: blur(16px);
+    }
+
+    .dialog-title {
+      flex: 1;
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    .dialog-body {
+      padding: 12px;
+    }
+
+    .dialog-actions {
+      display: flex;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 11px 12px;
+      border-top: 1px solid var(--border);
+      background: rgba(18, 20, 29, .88);
+    }
+
+    @media (max-width: 1200px) {
+      .workspace {
+        grid-template-columns: 250px minmax(0, 1fr) 275px;
+      }
+
+      .phone {
+        width: 275px;
+      }
+    }
+
+    @media (max-width: 940px) {
+      html,
+      body {
+        height: auto;
+        min-height: 100%;
+        overflow-x: hidden;
+        overflow-y: auto;
+      }
+
+      body {
+        display: block;
+      }
+
+      .topbar {
+        flex-wrap: wrap;
+        padding:
+          max(8px, env(safe-area-inset-top))
+          max(8px, env(safe-area-inset-right))
+          8px
+          max(8px, env(safe-area-inset-left));
+      }
+
+      .brand {
+        width: 100%;
+      }
+
+      .toolbar-spacer {
+        display: none;
+      }
+
+      .topbar .toolbar-group {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        width: 100%;
+      }
+
+      .topbar .toolbar-group button {
+        width: 100%;
+        min-width: 0;
+        min-height: 43px;
+        padding: 7px 5px;
+        white-space: normal;
+      }
+
+      .workspace,
+      .workspace.archive-mode {
+        display: block;
+      }
+
+      .sidebar {
+        height: min(48dvh, 440px);
+        min-height: 300px;
+        border-right: 0;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .main {
+        display: block;
+      }
+
+      .inspector {
+        display: block;
+        border-top: 1px solid var(--border);
+        border-left: 0;
+      }
+
+      .workspace.archive-mode .inspector {
+        display: none;
+      }
+
+      .inspector-body {
+        overflow: visible;
+      }
+
+      .file-head {
+        padding: 9px;
+      }
+
+      .file-title,
+      .file-path {
+        white-space: normal;
+        overflow-wrap: anywhere;
+      }
+
+      .editor {
+        overflow: visible;
+        padding: 8px;
+      }
+
+      .studio-stage {
+        min-height: 660px;
+        padding: 20px 8px;
+      }
+
+      .phone {
+        width: min(285px, 88vw);
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .form-field.full {
+        grid-column: auto;
+      }
+
+      .gallery {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .code-shell {
+        height: 63dvh;
+        min-height: 420px;
+      }
+
+      .code-highlight,
+      .code-input {
+        padding: 11px;
+        font-size: 16px;
+        line-height: 1.5;
+      }
+
+      .plain-editor,
+      .leaf-text,
+      .attribute-row input {
+        font-size: 16px;
+      }
+
+      .attribute-row {
+        grid-template-columns: minmax(0, 1fr) auto;
+      }
+
+      .attribute-name {
+        grid-column: 1 / -1;
+      }
+
+      .statusbar {
+        position: static;
+      }
+    }
+
+    @media (max-width: 500px) {
+      .sidebar {
+        height: min(45dvh, 400px);
+        min-height: 280px;
+      }
+
+      .file-info {
+        flex-basis: 100%;
+      }
+
+      .file-head > button {
+        flex: 1 1 calc(50% - 5px);
+      }
+
+      .editor {
+        padding: 6px;
+      }
+
+      .panel {
+        margin-bottom: 8px;
+      }
+
+      .panel-title {
+        flex-basis: 100%;
+      }
+
+      .editor-toolbar {
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+
+      .editor-toolbar button {
+        width: 100%;
+      }
+
+      .dashboard-grid,
+      .color-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .gallery {
+        gap: 6px;
+      }
+
+      .gallery-image {
+        height: 105px;
+      }
+
+      .gallery-actions {
+        grid-template-columns: 1fr;
+      }
+
+      .component-row {
+        grid-template-columns: auto minmax(0, 1fr);
+      }
+
+      .component-actions {
+        grid-column: 1 / -1;
+      }
+
+      .scene-tabs {
+        left: 8px;
+        max-width: calc(100% - 16px);
+        transform: none;
+      }
+
+      .statusbar .right {
+        width: 100%;
+        margin-left: 0;
+      }
+
+      .toast {
+        right: 10px;
+        bottom: max(10px, env(safe-area-inset-bottom));
+        width: calc(100vw - 20px);
+        max-width: none;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        transition-duration: .01ms !important;
+        animation-duration: .01ms !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-logo">MTZ</div>
+      <div>
+        Aurora Studio
+        <span class="brand-version">Xiaomi Theme Editor V6</span>
+      </div>
+    </div>
+
+    <div class="toolbar-group">
+      <button id="newThemeButton" class="success">
+        Neues Theme
+      </button>
+      <button id="openButton" class="primary">
+        MTZ öffnen
+      </button>
+      <button id="saveButton" disabled>
+        MTZ exportieren
+      </button>
+    </div>
+
+    <div class="toolbar-group">
+      <button id="undoButton" disabled>Rückgängig</button>
+      <button id="redoButton" disabled>Wiederholen</button>
+      <button id="searchButton" disabled>Suchen/Ersetzen</button>
+    </div>
+
+    <div class="toolbar-spacer"></div>
+
+    <div class="toolbar-group">
+      <button id="addFilesButton" disabled>Dateien hinzufügen</button>
+      <button id="addFolderButton" disabled>Ordner importieren</button>
+    </div>
+  </header>
+
+  <div id="workspace" class="workspace">
+    <aside class="sidebar">
+      <div class="view-switch">
+        <button id="studioViewButton">Studio-Modus</button>
+        <button id="archiveViewButton">Archiv-Modus</button>
+      </div>
+
+      <div class="sidebar-search">
+        <input
+          id="navigatorSearch"
+          type="search"
+          placeholder="Theme durchsuchen …"
+        >
+      </div>
+
+      <div id="studioSections" class="studio-sections"></div>
+
+      <div id="navigator" class="navigator">
+        <div class="navigator-empty">
+          Noch kein Theme geöffnet.
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div id="openTabs" class="open-tabs hidden"></div>
+
+      <div class="file-head">
+        <div class="file-info">
+          <div id="fileTitle" class="file-title">
+            MTZ Aurora Studio
+          </div>
+          <div id="filePath" class="file-path">
+            Öffne ein Theme oder erstelle ein neues.
+          </div>
+        </div>
+
+        <button id="duplicateButton" class="hidden">
+          Duplizieren
+        </button>
+        <button id="renameButton" class="hidden">
+          Umbenennen
+        </button>
+        <button id="replaceButton" class="hidden">
+          Ersetzen
+        </button>
+        <button id="deleteButton" class="danger hidden">
+          Löschen
+        </button>
+      </div>
+
+      <div id="editor" class="editor"></div>
+    </main>
+
+    <aside id="inspector" class="inspector">
+      <div class="inspector-head">
+        Eigenschaften
+      </div>
+      <div id="inspectorBody" class="inspector-body">
+        <p class="muted">
+          Wähle eine Komponente oder öffne die Studio-Vorschau.
+        </p>
+      </div>
+    </aside>
+  </div>
+
+  <footer class="statusbar">
+    <span id="statusText">Bereit.</span>
+    <span id="statusRight" class="right"></span>
+  </footer>
+
+  <div id="dropOverlay" class="drop-overlay">
+    <div class="drop-box">
+      <h2>Theme hier ablegen</h2>
+      <p class="muted">
+        MTZ-/ZIP-Datei öffnen oder neue Dateien in das Theme importieren.
+      </p>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <input
+    id="openInput"
+    type="file"
+    accept=".mtz,.zip,application/zip"
+    hidden
+  >
+  <input id="addFilesInput" type="file" multiple hidden>
+  <input
+    id="addFolderInput"
+    type="file"
+    webkitdirectory
+    multiple
+    hidden
+  >
+  <input id="replaceInput" type="file" hidden>
+  <input id="categoryInput" type="file" multiple hidden>
+  <input
+    id="batchIconsInput"
+    type="file"
+    accept="image/*"
+    multiple
+    hidden
+  >
+
+  <dialog id="newThemeDialog">
+    <form id="newThemeForm">
+      <div class="dialog-head">
+        <div class="dialog-title">Neues Xiaomi-Theme</div>
+        <button type="button" data-close="newThemeDialog">
+          Schließen
+        </button>
+      </div>
+
+      <div class="dialog-body">
+        <div class="form-grid">
+          <div class="form-field full">
+            <label for="newTitle">Theme-Name</label>
+            <input id="newTitle" value="Mein Aurora Theme" required>
+          </div>
+
+          <div class="form-field">
+            <label for="newAuthor">Autor</label>
+            <input id="newAuthor" value="Theme Creator">
+          </div>
+
+          <div class="form-field">
+            <label for="newDesigner">Designer</label>
+            <input id="newDesigner" value="Theme Creator">
+          </div>
+
+          <div class="form-field">
+            <label for="newVersion">Version</label>
+            <input id="newVersion" value="1.0">
+          </div>
+
+          <div class="form-field">
+            <label for="newUiVersion">MIUI UI-Version</label>
+            <input id="newUiVersion" value="14">
+          </div>
+
+          <div class="form-field">
+            <label for="newColor1">Wallpaper-Farbe 1</label>
+            <input id="newColor1" type="color" value="#7c3aed">
+          </div>
+
+          <div class="form-field">
+            <label for="newColor2">Wallpaper-Farbe 2</label>
+            <input id="newColor2" type="color" value="#111827">
+          </div>
+
+          <div class="form-field full">
+            <label for="newDescription">Beschreibung</label>
+            <textarea id="newDescription">Mein eigenes Xiaomi Theme.</textarea>
+          </div>
+
+          <div class="form-field full">
+            <label for="newWallpaper">
+              Optionales Wallpaper
+            </label>
+            <input id="newWallpaper" type="file" accept="image/*">
+          </div>
+
+          <div class="form-field full">
+            <label for="newIcons">
+              Optionale Icons
+            </label>
+            <input id="newIcons" type="file" accept="image/*" multiple>
+          </div>
+        </div>
+      </div>
+
+      <div class="dialog-actions">
+        <button type="button" data-close="newThemeDialog">
+          Abbrechen
+        </button>
+        <button type="submit" class="success">
+          Theme erstellen
+        </button>
+      </div>
+    </form>
+  </dialog>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const $ = selector => document.querySelector(selector);
+
+      const ui = {
+        workspace: $("#workspace"),
+        newThemeButton: $("#newThemeButton"),
+        openButton: $("#openButton"),
+        saveButton: $("#saveButton"),
+        undoButton: $("#undoButton"),
+        redoButton: $("#redoButton"),
+        searchButton: $("#searchButton"),
+        addFilesButton: $("#addFilesButton"),
+        addFolderButton: $("#addFolderButton"),
+
+        studioViewButton: $("#studioViewButton"),
+        archiveViewButton: $("#archiveViewButton"),
+        studioSections: $("#studioSections"),
+        navigatorSearch: $("#navigatorSearch"),
+        navigator: $("#navigator"),
+
+        openTabs: $("#openTabs"),
+        fileTitle: $("#fileTitle"),
+        filePath: $("#filePath"),
+        editor: $("#editor"),
+
+        duplicateButton: $("#duplicateButton"),
+        renameButton: $("#renameButton"),
+        replaceButton: $("#replaceButton"),
+        deleteButton: $("#deleteButton"),
+
+        inspectorBody: $("#inspectorBody"),
+
+        statusText: $("#statusText"),
+        statusRight: $("#statusRight"),
+        toast: $("#toast"),
+        dropOverlay: $("#dropOverlay"),
+
+        openInput: $("#openInput"),
+        addFilesInput: $("#addFilesInput"),
+        addFolderInput: $("#addFolderInput"),
+        replaceInput: $("#replaceInput"),
+        categoryInput: $("#categoryInput"),
+        batchIconsInput: $("#batchIconsInput"),
+
+        newThemeDialog: $("#newThemeDialog")
+      };
+
+      const sections = [
+        { id: "overview", label: "Übersicht", icon: "🏠", rgb: "255,106,0" },
+        { id: "preview", label: "Live-Studio", icon: "📱", rgb: "139,92,246" },
+        { id: "metadata", label: "Metadaten", icon: "📝", rgb: "56,189,248" },
+        { id: "wallpaper", label: "Wallpaper", icon: "🌄", rgb: "198,92,255" },
+        { id: "icon", label: "Icons", icon: "🧩", rgb: "255,106,0" },
+        { id: "lockscreen", label: "Lockscreen", icon: "🔒", rgb: "99,102,241" },
+        { id: "homescreen", label: "Homescreen", icon: "🏡", rgb: "66,217,156" },
+        { id: "systemui", label: "SystemUI", icon: "📶", rgb: "56,189,248" },
+        { id: "aod", label: "AOD", icon: "🕒", rgb: "198,92,255" },
+        { id: "font", label: "Schriften", icon: "🔤", rgb: "255,200,87" },
+        { id: "sound", label: "Sounds", icon: "🔊", rgb: "66,217,156" },
+        { id: "boot", label: "Bootanimation", icon: "🎬", rgb: "255,83,97" },
+        { id: "colors", label: "Farben", icon: "🎨", rgb: "198,92,255" },
+        { id: "xml", label: "XML", icon: "💻", rgb: "78,201,176" },
+        { id: "archive", label: "Archive", icon: "📦", rgb: "156,165,184" },
+        { id: "other", label: "Sonstiges", icon: "📄", rgb: "156,165,184" }
+      ];
+
+      const previewSettings = {
+        scene: "lockscreen",
+        accent: "#ff6a00",
+        clockSize: 48,
+        iconSize: 41,
+        blur: 0,
+        overlay: .1,
+        radius: 35,
+        cardRadius: 17,
+        compare: 100,
+        device: "standard"
+      };
+
+      let root = null;
+      let selectedNode = null;
+      let screen = "welcome";
+      let navigatorMode =
+        localStorage.getItem("auroraNavigatorMode") || "studio";
+      let activeSection = "overview";
+      let openNodes = [];
+      let nodeCounter = 0;
+      let busy = false;
+      let replaceTarget = null;
+      let pendingCategory = "other";
+      let objectUrls = [];
+      let xmlTimer = null;
+      let toastTimer = null;
+
+      const undoStack = [];
+      const redoStack = [];
+
+      function makeNode(options = {}) {
+        return {
+          id: ++nodeCounter,
+          name: options.name || "Unbenannt",
+          type: options.type || "file",
+          parent: options.parent || null,
+          children: options.children || [],
+          data: options.data || null,
+          originalData: options.originalData || null,
+          modified: Boolean(options.modified),
+          expanded: Boolean(options.expanded),
+          compression: options.compression || "DEFLATE",
+          date: options.date || new Date(),
+          unixPermissions: options.unixPermissions,
+          dosPermissions: options.dosPermissions
+        };
+      }
+
+      function escapeHtml(value) {
+        return String(value ?? "")
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
+      }
+
+      function escapeXml(value) {
+        return String(value ?? "")
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;");
+      }
+
+      function safeCdata(value) {
+        return String(value ?? "").replaceAll(
+          "]]>",
+          "]]]]><![CDATA[>"
+        );
+      }
+
+      function cloneBytes(bytes) {
+        return bytes ? new Uint8Array(bytes) : new Uint8Array();
+      }
+
+      function arraysEqual(a, b) {
+        if (!a || !b || a.length !== b.length) return false;
+
+        for (let i = 0; i < a.length; i++) {
+          if (a[i] !== b[i]) return false;
+        }
+
+        return true;
+      }
+
+      function formatBytes(bytes) {
+        const value = Number(bytes) || 0;
+
+        if (value < 1024) return value + " B";
+        if (value < 1024 ** 2) return (value / 1024).toFixed(1) + " KB";
+        if (value < 1024 ** 3) return (value / 1024 ** 2).toFixed(1) + " MB";
+
+        return (value / 1024 ** 3).toFixed(2) + " GB";
+      }
+
+      function setStatus(text, right = "") {
+        ui.statusText.textContent = text;
+        ui.statusRight.textContent = right;
+      }
+
+      function toast(text, error = false) {
+        clearTimeout(toastTimer);
+
+        ui.toast.textContent = text;
+        ui.toast.className = "toast show" + (error ? " error" : "");
+
+        toastTimer = setTimeout(() => {
+          ui.toast.className = "toast";
+        }, 3500);
+      }
+
+      function cleanupUrls() {
+        objectUrls.forEach(URL.revokeObjectURL);
+        objectUrls = [];
+      }
+
+      function objectUrl(node, original = false) {
+        const data =
+          original && node.originalData
+            ? node.originalData
+            : node.data;
+
+        const blob = new Blob(
+          [data],
+          { type: mimeType(node.name, data) }
+        );
+
+        const url = URL.createObjectURL(blob);
+        objectUrls.push(url);
+
+        return url;
+      }
+
+      function setBusy(value, message = "") {
+        busy = value;
+
+        if (message) setStatus(message);
+
+        updateButtons();
+      }
+
+      function addHistory(label, undo, redo) {
+        undoStack.push({ label, undo, redo });
+
+        if (undoStack.length > 50) undoStack.shift();
+
+        redoStack.length = 0;
+        updateButtons();
+      }
+
+      function undo() {
+        const action = undoStack.pop();
+        if (!action) return;
+
+        action.undo();
+        redoStack.push(action);
+
+        renderAll();
+        setStatus("Rückgängig: " + action.label);
+      }
+
+      function redo() {
+        const action = redoStack.pop();
+        if (!action) return;
+
+        action.redo();
+        undoStack.push(action);
+
+        renderAll();
+        setStatus("Wiederholt: " + action.label);
+      }
+
+      function walk(node, callback) {
+        callback(node);
+
+        for (const child of node.children || []) {
+          walk(child, callback);
+        }
+      }
+
+      function countType(node, type) {
+        let count = node.type === type ? 1 : 0;
+
+        for (const child of node.children || []) {
+          count += countType(child, type);
+        }
+
+        return count;
+      }
+
+      function countNodes(node) {
+        return 1 + (node.children || []).reduce(
+          (sum, child) => sum + countNodes(child),
+          0
+        );
+      }
+
+      function nodePath(node, separator = " › ") {
+        const parts = [];
+        let current = node;
+
+        while (current) {
+          parts.unshift(current.name);
+          current = current.parent;
+        }
+
+        return parts.join(separator);
+      }
+
+      function isAttached(node) {
+        if (!root || !node) return false;
+
+        let current = node;
+
+        while (current.parent) current = current.parent;
+
+        return current === root;
+      }
+
+      function findChild(parent, name) {
+        return parent.children.find(child => child.name === name);
+      }
+
+      function findByName(name) {
+        let result = null;
+
+        if (!root) return null;
+
+        walk(root, node => {
+          if (
+            !result &&
+            node.name.toLowerCase() === name.toLowerCase()
+          ) {
+            result = node;
+          }
+        });
+
+        return result;
+      }
+
+      function ensureFolder(parent, name) {
+        let folder = parent.children.find(
+          node => node.type === "folder" && node.name === name
+        );
+
+        if (!folder) {
+          folder = makeNode({
+            name,
+            type: "folder",
+            parent,
+            modified: true
+          });
+
+          parent.children.push(folder);
+        }
+
+        return folder;
+      }
+
+      function sortChildren(node) {
+        node.children.sort((a, b) => {
+          const ac = a.type === "folder" || a.type === "archive";
+          const bc = b.type === "folder" || b.type === "archive";
+
+          if (ac !== bc) return ac ? -1 : 1;
+
+          return a.name.localeCompare(
+            b.name,
+            undefined,
+            { numeric: true, sensitivity: "base" }
+          );
+        });
+      }
+
+      function markChanged(node) {
+        if (node) node.modified = true;
+        if (root) root.modified = true;
+      }
+
+      function isDirty(node) {
+        return Boolean(
+          node.modified ||
+          node.children?.some(isDirty)
+        );
+      }
+
+      function isZip(bytes) {
+        return bytes &&
+          bytes.length >= 4 &&
+          bytes[0] === 0x50 &&
+          bytes[1] === 0x4b &&
+          (
+            (bytes[2] === 0x03 && bytes[3] === 0x04) ||
+            (bytes[2] === 0x05 && bytes[3] === 0x06) ||
+            (bytes[2] === 0x07 && bytes[3] === 0x08)
+          );
+      }
+
+      async function unpackArchive(name, bytes, parent = null, depth = 0) {
+        if (depth > 16) {
+          throw new Error("Zu viele verschachtelte Archive.");
+        }
+
+        const zip = await JSZip.loadAsync(bytes, {
+          checkCRC32: false,
+          createFolders: true
+        });
+
+        const archive = makeNode({
+          name,
+          type: "archive",
+          parent,
+          originalData: bytes,
+          expanded: depth === 0
+        });
+
+        const entries = Object.values(zip.files)
+          .sort((a, b) => a.name.localeCompare(b.name));
+
+        let processed = 0;
+
+        for (const entry of entries) {
+          const clean = entry.name
+            .replaceAll("\\", "/")
+            .replace(/^\/+/, "");
+
+          if (!clean) continue;
+
+          const parts = clean.split("/").filter(Boolean);
+          let container = archive;
+
+          const folders = entry.dir ? parts : parts.slice(0, -1);
+
+          for (const folderName of folders) {
+            container = ensureFolder(container, folderName);
+          }
+
+          if (!entry.dir) {
+            const fileName = parts.at(-1);
+            const data = await entry.async("uint8array");
+            let child = null;
+
+            if (isZip(data)) {
+              try {
+                child = await unpackArchive(
+                  fileName,
+                  data,
+                  container,
+                  depth + 1
+                );
+              } catch {
+                child = null;
+              }
+            }
+
+            if (!child) {
+              child = makeNode({
+                name: fileName,
+                type: "file",
+                parent: container,
+                data,
+                originalData: cloneBytes(data),
+                date: entry.date
+              });
+            }
+
+            const oldIndex = container.children.findIndex(
+              item => item.name === fileName
+            );
+
+            if (oldIndex >= 0) {
+              container.children[oldIndex] = child;
+            } else {
+              container.children.push(child);
+            }
+          }
+
+          processed++;
+
+          if (processed % 30 === 0) {
+            setStatus(
+              "Theme wird analysiert …",
+              processed + " / " + entries.length
+            );
+
+            await new Promise(resolve => setTimeout(resolve, 0));
+          }
+        }
+
+        walk(archive, node => {
+          if (node.children) sortChildren(node);
+        });
+
+        return archive;
+      }
+
+      async function openTheme(file) {
+        if (!window.JSZip) {
+          toast("JSZip konnte nicht geladen werden.", true);
+          return;
+        }
+
+        setBusy(true, "Theme wird geöffnet …");
+
+        try {
+          const bytes = new Uint8Array(await file.arrayBuffer());
+
+          if (!isZip(bytes)) {
+            throw new Error("Die Datei ist kein ZIP-basiertes MTZ-Theme.");
+          }
+
+          root = await unpackArchive(file.name, bytes);
+          selectedNode = root;
+          screen = "dashboard";
+          activeSection = "overview";
+          openNodes = [];
+
+          undoStack.length = 0;
+          redoStack.length = 0;
+
+          renderAll();
+
+          setStatus(
+            "Theme geladen.",
+            countNodes(root) + " Elemente"
+          );
+
+          toast("Theme wurde erfolgreich geöffnet.");
+        } catch (error) {
+          console.error(error);
+          toast(error.message || "Theme konnte nicht geöffnet werden.", true);
+        } finally {
+          setBusy(false);
+        }
+      }
+
+      function makeDescription(meta) {
+        return `<?xml version="1.0" encoding="UTF-8"?>
+<theme>
+  <version>${escapeXml(meta.version)}</version>
+  <uiVersion>${escapeXml(meta.uiVersion)}</uiVersion>
+  <author><![CDATA[${safeCdata(meta.author)}]]></author>
+  <designer><![CDATA[${safeCdata(meta.designer)}]]></designer>
+  <title><![CDATA[${safeCdata(meta.title)}]]></title>
+  <titles>
+    <title locale="de_DE"><![CDATA[${safeCdata(meta.title)}]]></title>
+    <title locale="en_US"><![CDATA[${safeCdata(meta.title)}]]></title>
+  </titles>
+  <description><![CDATA[${safeCdata(meta.description)}]]></description>
+  <descriptions>
+    <description locale="de_DE"><![CDATA[${safeCdata(meta.description)}]]></description>
+    <description locale="en_US"><![CDATA[${safeCdata(meta.description)}]]></description>
+  </descriptions>
+  <miuiAdapterVersion>3.0</miuiAdapterVersion>
+  <miuiAdapterVersion>3.1</miuiAdapterVersion>
+  <miuiAdapterVersion>3.2</miuiAdapterVersion>
+</theme>`;
+      }
+
+      async function generateWallpaper(color1, color2) {
+        const canvas = document.createElement("canvas");
+        canvas.width = 1080;
+        canvas.height = 2400;
+
+        const context = canvas.getContext("2d");
+        const gradient = context.createLinearGradient(
+          0,
+          0,
+          canvas.width,
+          canvas.height
+        );
+
+        gradient.addColorStop(0, color1);
+        gradient.addColorStop(1, color2);
+
+        context.fillStyle = gradient;
+        context.fillRect(0, 0, canvas.width, canvas.height);
+
+        const glow = context.createRadialGradient(
+          800,
+          420,
+          20,
+          800,
+          420,
+          750
+        );
+
+        glow.addColorStop(0, "rgba(255,255,255,.27)");
+        glow.addColorStop(1, "rgba(255,255,255,0)");
+
+        context.fillStyle = glow;
+        context.fillRect(0, 0, canvas.width, canvas.height);
+
+        const blob = await new Promise(resolve => {
+          canvas.toBlob(resolve, "image/jpeg", .93);
+        });
+
+        return new Uint8Array(await blob.arrayBuffer());
+      }
+
+      async function createNewTheme() {
+        const meta = {
+          title: $("#newTitle").value.trim() || "Mein Aurora Theme",
+          author: $("#newAuthor").value.trim() || "Theme Creator",
+          designer: $("#newDesigner").value.trim() || "Theme Creator",
+          version: $("#newVersion").value.trim() || "1.0",
+          uiVersion: $("#newUiVersion").value.trim() || "14",
+          description: $("#newDescription").value
+        };
+
+        setBusy(true, "Neues Theme wird erstellt …");
+
+        try {
+          const safeName = meta.title
+            .replace(/[<>:"/\\|?*\x00-\x1f]/g, "_")
+            .trim() || "Aurora Theme";
+
+          root = makeNode({
+            name: safeName + ".mtz",
+            type: "archive",
+            expanded: true,
+            modified: true
+          });
+
+          const description = makeNode({
+            name: "description.xml",
+            type: "file",
+            parent: root,
+            data: new TextEncoder().encode(makeDescription(meta)),
+            modified: true
+          });
+
+          const wallpaperFolder = makeNode({
+            name: "wallpaper",
+            type: "folder",
+            parent: root,
+            modified: true
+          });
+
+          const previewFolder = makeNode({
+            name: "preview",
+            type: "folder",
+            parent: root,
+            modified: true
+          });
+
+          const iconsArchive = makeNode({
+            name: "icons",
+            type: "archive",
+            parent: root,
+            expanded: true,
+            modified: true
+          });
+
+          root.children.push(
+            description,
+            wallpaperFolder,
+            previewFolder,
+            iconsArchive
+          );
+
+          const uploadedWallpaper = $("#newWallpaper").files?.[0];
+          let wallpaperBytes;
+          let wallpaperName = "default_wallpaper.jpg";
+
+          if (uploadedWallpaper) {
+            wallpaperBytes = new Uint8Array(
+              await uploadedWallpaper.arrayBuffer()
+            );
+
+            wallpaperName =
+              "default_wallpaper" +
+              (uploadedWallpaper.name.match(/\.[^.]+$/)?.[0] || ".jpg");
+          } else {
+            wallpaperBytes = await generateWallpaper(
+              $("#newColor1").value,
+              $("#newColor2").value
+            );
+          }
+
+          wallpaperFolder.children.push(
+            makeNode({
+              name: wallpaperName,
+              type: "file",
+              parent: wallpaperFolder,
+              data: cloneBytes(wallpaperBytes),
+              originalData: cloneBytes(wallpaperBytes),
+              modified: true
+            })
+          );
+
+          previewFolder.children.push(
+            makeNode({
+              name: "preview_wallpaper_0.jpg",
+              type: "file",
+              parent: previewFolder,
+              data: cloneBytes(wallpaperBytes),
+              originalData: cloneBytes(wallpaperBytes),
+              modified: true
+            })
+          );
+
+          for (const file of Array.from($("#newIcons").files || [])) {
+            const data = new Uint8Array(await file.arrayBuffer());
+
+            iconsArchive.children.push(
+              makeNode({
+                name: file.name,
+                type: "file",
+                parent: iconsArchive,
+                data,
+                originalData: cloneBytes(data),
+                modified: true
+              })
+            );
+          }
+
+          selectedNode = root;
+          screen = "dashboard";
+          activeSection = "overview";
+          openNodes = [];
+
+          undoStack.length = 0;
+          redoStack.length = 0;
+
+          ui.newThemeDialog.close();
+          renderAll();
+
+          setStatus(
+            "Neues Theme bereit.",
+            countNodes(root) + " Elemente"
+          );
+
+          toast("Neues Theme wurde erstellt.");
+        } catch (error) {
+          console.error(error);
+          toast("Theme konnte nicht erstellt werden.", true);
+        } finally {
+          setBusy(false);
+        }
+      }
+
+      function isImageMagic(bytes) {
+        if (!bytes || bytes.length < 4) return false;
+
+        return (
+          (
+            bytes[0] === 0x89 &&
+            bytes[1] === 0x50 &&
+            bytes[2] === 0x4e &&
+            bytes[3] === 0x47
+          ) ||
+          (
+            bytes[0] === 0xff &&
+            bytes[1] === 0xd8
+          ) ||
+          (
+            bytes[0] === 0x47 &&
+            bytes[1] === 0x49 &&
+            bytes[2] === 0x46
+          ) ||
+          (
+            bytes[0] === 0x42 &&
+            bytes[1] === 0x4d
+          ) ||
+          (
+            bytes.length > 12 &&
+            String.fromCharCode(...bytes.slice(0, 4)) === "RIFF" &&
+            String.fromCharCode(...bytes.slice(8, 12)) === "WEBP"
+          )
+        );
+      }
+
+      function isImage(node) {
+        return node?.type === "file" &&
+          (
+            /\.(png|jpe?g|gif|webp|svg|bmp|ico)$/i.test(node.name) ||
+            isImageMagic(node.data)
+          );
+      }
+
+      function isFont(node) {
+        return node?.type === "file" &&
+          /\.(ttf|otf|woff2?|ttc)$/i.test(node.name);
+      }
+
+      function isAudio(node) {
+        return node?.type === "file" &&
+          /\.(mp3|wav|ogg|m4a|aac|flac)$/i.test(node.name);
+      }
+
+      function isMostlyText(bytes) {
+        if (!bytes?.length) return true;
+
+        const sample = bytes.slice(0, Math.min(bytes.length, 4096));
+        let readable = 0;
+
+        for (const byte of sample) {
+          if (
+            byte === 9 ||
+            byte === 10 ||
+            byte === 13 ||
+            (byte >= 32 && byte <= 126) ||
+            byte >= 160
+          ) {
+            readable++;
+          }
+        }
+
+        return readable / sample.length > .88;
+      }
+
+      function isTextNode(node) {
+        if (
+          node?.type !== "file" ||
+          isImage(node) ||
+          isAudio(node) ||
+          isFont(node)
+        ) {
+          return false;
+        }
+
+        return (
+          /\.(xml|txt|json|ini|cfg|conf|properties|css|js|html|md|yml|yaml|csv|log)$/i
+            .test(node.name) ||
+          isMostlyText(node.data)
+        );
+      }
+
+      function mimeType(name, bytes) {
+        const ext = name.split(".").pop()?.toLowerCase();
+
+        const types = {
+          png: "image/png",
+          jpg: "image/jpeg",
+          jpeg: "image/jpeg",
+          gif: "image/gif",
+          webp: "image/webp",
+          svg: "image/svg+xml",
+          bmp: "image/bmp",
+          ico: "image/x-icon",
+          mp3: "audio/mpeg",
+          wav: "audio/wav",
+          ogg: "audio/ogg",
+          m4a: "audio/mp4",
+          aac: "audio/aac",
+          flac: "audio/flac",
+          ttf: "font/ttf",
+          otf: "font/otf",
+          woff: "font/woff",
+          woff2: "font/woff2"
+        };
+
+        if (types[ext]) return types[ext];
+
+        if (bytes?.[0] === 0x89 && bytes?.[1] === 0x50) {
+          return "image/png";
+        }
+
+        if (bytes?.[0] === 0xff && bytes?.[1] === 0xd8) {
+          return "image/jpeg";
+        }
+
+        return "application/octet-stream";
+      }
+
+      function decodeBytes(bytes) {
+        if (!bytes) {
+          return { text: "", encoding: "utf-8", bom: false };
+        }
+
+        let encoding = "utf-8";
+        let bom = false;
+        let start = 0;
+
+        if (
+          bytes[0] === 0xef &&
+          bytes[1] === 0xbb &&
+          bytes[2] === 0xbf
+        ) {
+          bom = true;
+          start = 3;
+        } else if (
+          bytes[0] === 0xff &&
+          bytes[1] === 0xfe
+        ) {
+          encoding = "utf-16le";
+          bom = true;
+          start = 2;
+        } else if (
+          bytes[0] === 0xfe &&
+          bytes[1] === 0xff
+        ) {
+          encoding = "utf-16be";
+          bom = true;
+          start = 2;
+        }
+
+        try {
+          return {
+            text: new TextDecoder(encoding).decode(bytes.slice(start)),
+            encoding,
+            bom
+          };
+        } catch {
+          return {
+            text: new TextDecoder("utf-8").decode(bytes),
+            encoding: "utf-8",
+            bom: false
+          };
+        }
+      }
+
+      function encodeText(text, encoding = "utf-8", bom = false) {
+        if (encoding === "utf-16le" || encoding === "utf-16be") {
+          const output = new Uint8Array(
+            text.length * 2 + (bom ? 2 : 0)
+          );
+
+          let offset = 0;
+
+          if (bom) {
+            if (encoding === "utf-16le") {
+              output[0] = 0xff;
+              output[1] = 0xfe;
+            } else {
+              output[0] = 0xfe;
+              output[1] = 0xff;
+            }
+
+            offset = 2;
+          }
+
+          for (let i = 0; i < text.length; i++) {
+            const code = text.charCodeAt(i);
+
+            if (encoding === "utf-16le") {
+              output[offset++] = code & 0xff;
+              output[offset++] = code >> 8;
+            } else {
+              output[offset++] = code >> 8;
+              output[offset++] = code & 0xff;
+            }
+          }
+
+          return output;
+        }
+
+        const encoded = new TextEncoder().encode(text);
+
+        if (!bom) return encoded;
+
+        const output = new Uint8Array(encoded.length + 3);
+
+        output.set([0xef, 0xbb, 0xbf]);
+        output.set(encoded, 3);
+
+        return output;
+      }
+
+      function parseXml(text) {
+        const documentNode = new DOMParser().parseFromString(
+          text,
+          "application/xml"
+        );
+
+        const error = documentNode.querySelector("parsererror");
+
+        return {
+          document: error ? null : documentNode,
+          error: error?.textContent.trim() || null
+        };
+      }
+
+      function categoryOf(node) {
+        const path = nodePath(node, "/").toLowerCase();
+        const name = node.name.toLowerCase();
+
+        if (
+          name === "description.xml" ||
+          name === "module_config.xml" ||
+          name === "plugin_config.xml" ||
+          /manifest/.test(name)
+        ) {
+          return "metadata";
+        }
+
+        if (/wallpaper|default_wall|home_wall/.test(path)) {
+          return "wallpaper";
+        }
+
+        if (/(^|\/)icons?(\/|$)/.test(path)) {
+          return "icon";
+        }
+
+        if (/lockscreen|lock_screen|lockstyle|advance\/lock/.test(path)) {
+          return "lockscreen";
+        }
+
+        if (/com\.miui\.home|launcher|homescreen|home_screen/.test(path)) {
+          return "homescreen";
+        }
+
+        if (
+          /com\.android\.systemui|systemui|statusbar|status_bar|notification/.test(path)
+        ) {
+          return "systemui";
+        }
+
+        if (/always.?on|aod|com\.miui\.aod/.test(path)) {
+          return "aod";
+        }
+
+        if (isFont(node)) return "font";
+        if (isAudio(node)) return "sound";
+
+        if (/bootanimation|boot_animation|boots\/|boot\./.test(path)) {
+          return "boot";
+        }
+
+        if (/\.xml$/i.test(node.name) && isMostlyText(node.data)) {
+          return "xml";
+        }
+
+        if (node.type === "archive") return "archive";
+
+        return "other";
+      }
+
+      function sectionNodes(sectionId) {
+        const nodes = [];
+
+        if (!root) return nodes;
+
+        walk(root, node => {
+          if (node !== root && categoryOf(node) === sectionId) {
+            nodes.push(node);
+          }
+        });
+
+        return nodes;
+      }
+
+      function allImages() {
+        const nodes = [];
+
+        if (root) {
+          walk(root, node => {
+            if (isImage(node)) nodes.push(node);
+          });
+        }
+
+        return nodes;
+      }
+
+      function nodeIcon(node) {
+        if (node.type === "archive") return "📦";
+        if (node.type === "folder") return "📁";
+        if (isImage(node)) return "🖼";
+        if (isFont(node)) return "🔤";
+        if (isAudio(node)) return "🔊";
+        if (/\.xml$/i.test(node.name)) return "🧩";
+        return "📄";
+      }
+
+      function selectNode(node) {
+        selectedNode = node;
+        screen = node === root ? "dashboard" : "file";
+
+        if (node !== root && !openNodes.includes(node)) {
+          openNodes.push(node);
+        }
+
+        if (openNodes.length > 18) openNodes.shift();
+
+        renderAll();
+
+        if (window.matchMedia("(max-width:940px)").matches) {
+          requestAnimationFrame(() => {
+            document.querySelector(".main")?.scrollIntoView({
+              behavior: "smooth",
+              block: "start"
+            });
+          });
+        }
+      }
+
+      function openSection(sectionId) {
+        activeSection = sectionId;
+        selectedNode = root;
+
+        const section = sections.find(item => item.id === sectionId);
+
+        if (section) {
+          document.documentElement.style.setProperty(
+            "--accent-rgb",
+            section.rgb
+          );
+        }
+
+        if (sectionId === "overview") {
+          screen = "dashboard";
+        } else if (sectionId === "preview") {
+          screen = "preview";
+        } else if (sectionId === "colors") {
+          screen = "colors";
+        } else {
+          screen = "category";
+        }
+
+        renderAll();
+      }
+
+      function setNavigatorMode(mode) {
+        navigatorMode = mode;
+
+        localStorage.setItem(
+          "auroraNavigatorMode",
+          mode
+        );
+
+        renderAll();
+      }
+
+      function renderAll() {
+        cleanupUrls();
+
+        openNodes = openNodes.filter(isAttached);
+
+        ui.workspace.classList.toggle(
+          "archive-mode",
+          navigatorMode === "archive"
+        );
+
+        renderNavigator();
+        renderTabs();
+        renderContent();
+        renderInspector();
+        updateButtons();
+      }
+
+      function renderNavigator() {
+        ui.studioViewButton.classList.toggle(
+          "active",
+          navigatorMode === "studio"
+        );
+
+        ui.archiveViewButton.classList.toggle(
+          "active",
+          navigatorMode === "archive"
+        );
+
+        ui.studioSections.classList.toggle(
+          "hidden",
+          navigatorMode !== "studio"
+        );
+
+        if (!root) {
+          ui.studioSections.innerHTML = "";
+          ui.navigator.innerHTML =
+            '<div class="navigator-empty">Noch kein Theme geöffnet.</div>';
+          return;
+        }
+
+        if (navigatorMode === "archive") {
+          renderArchiveTree();
+        } else {
+          renderStudioNavigation();
+        }
+      }
+
+      function renderStudioNavigation() {
+        ui.studioSections.innerHTML = "";
+
+        for (const section of sections) {
+          const button = document.createElement("button");
+
+          button.textContent = section.icon + " " + section.label;
+          button.style.setProperty("--section-rgb", section.rgb);
+          button.classList.toggle("active", activeSection === section.id);
+          button.onclick = () => openSection(section.id);
+
+          ui.studioSections.append(button);
+        }
+
+        const query = ui.navigatorSearch.value.trim().toLowerCase();
+
+        let nodes;
+
+        if (
+          ["overview", "preview", "colors"].includes(activeSection)
+        ) {
+          nodes = root.children;
+        } else {
+          nodes = sectionNodes(activeSection);
+        }
+
+        nodes = nodes.filter(node => {
+          return (
+            !query ||
+            nodePath(node, "/").toLowerCase().includes(query)
+          );
+        });
+
+        ui.navigator.innerHTML = "";
+
+        if (!nodes.length) {
+          ui.navigator.innerHTML =
+            '<div class="navigator-empty">Keine passenden Komponenten gefunden.</div>';
+          return;
+        }
+
+        for (const node of nodes) {
+          const row = document.createElement("div");
+
+          row.className =
+            "studio-row" +
+            (
+              selectedNode === node && screen === "file"
+                ? " selected"
+                : ""
+            );
+
+          const icon = document.createElement("span");
+          icon.className = "node-icon";
+          icon.textContent = nodeIcon(node);
+
+          const content = document.createElement("div");
+          content.className = "studio-row-content";
+
+          const name = document.createElement("div");
+          name.className = "studio-row-name";
+          name.textContent = node.name;
+
+          const path = document.createElement("div");
+          path.className = "studio-row-path";
+          path.textContent = nodePath(node, "/");
+
+          content.append(name, path);
+          row.append(icon, content);
+
+          if (node.modified) {
+            const dot = document.createElement("span");
+            dot.className = "modified-dot";
+            row.append(dot);
+          }
+
+          row.onclick = () => selectNode(node);
+
+          ui.navigator.append(row);
+        }
+      }
+
+      function visibleArchiveNodes(query) {
+        const visible = new Set();
+
+        function visit(node) {
+          const matches = node.name.toLowerCase().includes(query);
+          let childMatches = false;
+
+          for (const child of node.children || []) {
+            if (visit(child)) childMatches = true;
+          }
+
+          if (matches || childMatches) {
+            visible.add(node);
+            return true;
+          }
+
+          return false;
+        }
+
+        visit(root);
+        return visible;
+      }
+
+      function renderArchiveTree() {
+        const query = ui.navigatorSearch.value.trim().toLowerCase();
+        const visible = query ? visibleArchiveNodes(query) : null;
+
+        ui.navigator.innerHTML = "";
+
+        function append(node, depth) {
+          if (visible && !visible.has(node)) return;
+
+          const hasChildren =
+            (node.type === "archive" || node.type === "folder") &&
+            node.children.length > 0;
+
+          const row = document.createElement("div");
+
+          row.className =
+            "tree-row" +
+            (
+              selectedNode === node && screen === "file"
+                ? " selected"
+                : ""
+            );
+
+          row.style.paddingLeft = (depth * 16 + 4) + "px";
+
+          const toggle = document.createElement("button");
+          toggle.className = "tree-toggle";
+          toggle.tabIndex = -1;
+          toggle.textContent = hasChildren
+            ? ((node.expanded || query) ? "▾" : "▸")
+            : "";
+
+          toggle.onclick = event => {
+            event.stopPropagation();
+            node.expanded = !node.expanded;
+            renderNavigator();
+          };
+
+          const icon = document.createElement("span");
+          icon.className = "node-icon";
+          icon.textContent = nodeIcon(node);
+
+          const name = document.createElement("span");
+          name.className = "node-name";
+          name.textContent = node.name;
+
+          row.append(toggle, icon, name);
+
+          if (node.modified) {
+            const dot = document.createElement("span");
+            dot.className = "modified-dot";
+            row.append(dot);
+          }
+
+          row.onclick = () => selectNode(node);
+
+          row.ondblclick = () => {
+            if (hasChildren) {
+              node.expanded = !node.expanded;
+              renderNavigator();
+            }
+          };
+
+          ui.navigator.append(row);
+
+          if (hasChildren && (node.expanded || query)) {
+            node.children.forEach(child => append(child, depth + 1));
+          }
+        }
+
+        append(root, 0);
+      }
+
+      function renderTabs() {
+        openNodes = openNodes.filter(isAttached);
+
+        ui.openTabs.classList.toggle("hidden", !openNodes.length);
+        ui.openTabs.innerHTML = "";
+
+        for (const node of openNodes) {
+          const tab = document.createElement("div");
+
+          tab.className =
+            "open-tab" +
+            (
+              selectedNode === node && screen === "file"
+                ? " active"
+                : ""
+            );
+
+          const icon = document.createElement("span");
+          icon.textContent = nodeIcon(node);
+
+          const name = document.createElement("span");
+          name.className = "open-tab-name";
+          name.textContent = node.name;
+
+          const close = document.createElement("button");
+          close.className = "tab-close";
+          close.textContent = "×";
+
+          close.onclick = event => {
+            event.stopPropagation();
+
+            openNodes = openNodes.filter(item => item !== node);
+
+            if (selectedNode === node) {
+              const next = openNodes.at(-1);
+
+              if (next) {
+                selectedNode = next;
+                screen = "file";
+              } else {
+                selectedNode = root;
+                screen = "dashboard";
+                activeSection = "overview";
+              }
+            }
+
+            renderAll();
+          };
+
+          tab.append(icon, name);
+
+          if (node.modified) {
+            const dot = document.createElement("span");
+            dot.className = "modified-dot";
+            tab.append(dot);
+          }
+
+          tab.append(close);
+
+          tab.onclick = () => {
+            selectedNode = node;
+            screen = "file";
+            renderAll();
+          };
+
+          ui.openTabs.append(tab);
+        }
+      }
+
+      function renderContent() {
+        if (!root) {
+          renderWelcome();
+          return;
+        }
+
+        if (screen === "dashboard") {
+          renderDashboard();
+        } else if (screen === "preview") {
+          renderLiveStudio();
+        } else if (screen === "colors") {
+          renderColorStudio();
+        } else if (screen === "category") {
+          renderCategory();
+        } else {
+          renderSelectedNode();
+        }
+      }
+
+      function renderWelcome() {
+        ui.fileTitle.textContent = "MTZ Aurora Studio";
+        ui.filePath.textContent =
+          "Öffne ein Theme oder erstelle dein eigenes Xiaomi-Theme.";
+
+        ui.editor.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-card">
+              <h1>Aurora Theme Studio</h1>
+
+              <p class="muted">
+                Visueller Xiaomi-Theme-Editor mit Live-Vorschau,
+                Archiv-Modus, XML-Editor und Before-/After-Vergleich.
+              </p>
+
+              <div class="editor-toolbar">
+                <button id="welcomeNewButton" class="success">
+                  Neues Theme erstellen
+                </button>
+
+                <button id="welcomeOpenButton" class="primary">
+                  MTZ öffnen
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+
+        $("#welcomeNewButton").onclick =
+          () => ui.newThemeDialog.showModal();
+
+        $("#welcomeOpenButton").onclick =
+          () => ui.openInput.click();
+      }
+
+      function themeMetadata() {
+        const defaults = {
+          title: root.name.replace(/\.(mtz|zip)$/i, ""),
+          author: "",
+          designer: "",
+          version: "1.0",
+          uiVersion: "",
+          description: ""
+        };
+
+        const node = findByName("description.xml");
+
+        if (!node || node.type !== "file") return defaults;
+
+        const parsed = parseXml(decodeBytes(node.data).text);
+
+        if (!parsed.document) return defaults;
+
+        const get = name =>
+          parsed.document.getElementsByTagName(name)?.[0]?.textContent || "";
+
+        return {
+          title: get("title") || defaults.title,
+          author: get("author"),
+          designer: get("designer"),
+          version: get("version") || "1.0",
+          uiVersion: get("uiVersion"),
+          description: get("description")
+        };
+      }
+
+      function renderDashboard() {
+        const meta = themeMetadata();
+
+        ui.fileTitle.textContent = "Theme-Dashboard";
+        ui.filePath.textContent = root.name;
+
+        ui.editor.innerHTML = `
+          <section class="panel">
+            <div class="panel-head">
+              <div class="panel-title">Theme-Übersicht</div>
+              <span class="status-pill ${isDirty(root) ? "" : "ok"}">
+                ${isDirty(root) ? "Ungespeicherte Änderungen" : "Unverändert"}
+              </span>
+            </div>
+
+            <div class="panel-body">
+              <div class="dashboard-grid">
+                <div class="dashboard-card" style="--card-rgb:255,106,0">
+                  <h3>Dateien</h3>
+                  <div class="dashboard-value">${countType(root, "file")}</div>
+                </div>
+
+                <div class="dashboard-card" style="--card-rgb:139,92,246">
+                  <h3>Module</h3>
+                  <div class="dashboard-value">
+                    ${Math.max(0, countType(root, "archive") - 1)}
+                  </div>
+                </div>
+
+                <div class="dashboard-card" style="--card-rgb:56,189,248">
+                  <h3>Bilder</h3>
+                  <div class="dashboard-value">${allImages().length}</div>
+                </div>
+
+                <div class="dashboard-card" style="--card-rgb:66,217,156">
+                  <h3>Offene Tabs</h3>
+                  <div class="dashboard-value">${openNodes.length}</div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-head">
+              <div class="panel-title">Theme-Metadaten</div>
+              <span class="status-pill">description.xml</span>
+            </div>
+
+            <div class="panel-body">
+              <div class="form-grid">
+                <div class="form-field full">
+                  <label for="metaTitle">Theme-Titel</label>
+                  <input id="metaTitle" value="${escapeHtml(meta.title)}">
+                </div>
+
+                <div class="form-field">
+                  <label for="metaAuthor">Autor</label>
+                  <input id="metaAuthor" value="${escapeHtml(meta.author)}">
+                </div>
+
+                <div class="form-field">
+                  <label for="metaDesigner">Designer</label>
+                  <input id="metaDesigner" value="${escapeHtml(meta.designer)}">
+                </div>
+
+                <div class="form-field">
+                  <label for="metaVersion">Version</label>
+                  <input id="metaVersion" value="${escapeHtml(meta.version)}">
+                </div>
+
+                <div class="form-field">
+                  <label for="metaUiVersion">MIUI UI-Version</label>
+                  <input id="metaUiVersion" value="${escapeHtml(meta.uiVersion)}">
+                </div>
+
+                <div class="form-field full">
+                  <label for="metaDescription">Beschreibung</label>
+                  <textarea id="metaDescription">${escapeHtml(meta.description)}</textarea>
+                </div>
+              </div>
+
+              <div class="editor-toolbar" style="margin-top:12px">
+                <button id="saveMetaButton" class="primary">
+                  Metadaten übernehmen
+                </button>
+
+                <button id="openStudioButton">
+                  Live-Studio öffnen
+                </button>
+
+                <button id="openWallpaperButton">
+                  Wallpaper bearbeiten
+                </button>
+
+                <button id="openIconsButton">
+                  Icons bearbeiten
+                </button>
+              </div>
+            </div>
+          </section>
+        `;
+
+        $("#saveMetaButton").onclick = saveMetadata;
+        $("#openStudioButton").onclick = () => openSection("preview");
+        $("#openWallpaperButton").onclick = () => openSection("wallpaper");
+        $("#openIconsButton").onclick = () => openSection("icon");
+      }
+
+      function saveMetadata() {
+        let node = findByName("description.xml");
+
+        const meta = {
+          title: $("#metaTitle").value.trim() || "Mein Theme",
+          author: $("#metaAuthor").value,
+          designer: $("#metaDesigner").value,
+          version: $("#metaVersion").value || "1.0",
+          uiVersion: $("#metaUiVersion").value,
+          description: $("#metaDescription").value
+        };
+
+        if (!node) {
+          node = makeNode({
+            name: "description.xml",
+            type: "file",
+            parent: root,
+            data: new Uint8Array(),
+            modified: true
+          });
+
+          root.children.unshift(node);
+        }
+
+        const oldData = cloneBytes(node.data);
+        const newData = new TextEncoder().encode(makeDescription(meta));
+
+        node.data = cloneBytes(newData);
+        markChanged(node);
+
+        addHistory(
+          "Theme-Metadaten",
+          () => node.data = cloneBytes(oldData),
+          () => node.data = cloneBytes(newData)
+        );
+
+        renderAll();
+        toast("Metadaten wurden aktualisiert.");
+      }
+
+      function previewAssets() {
+        const wallpapers = sectionNodes("wallpaper").filter(isImage);
+        const icons = sectionNodes("icon").filter(isImage);
+        const others = allImages().filter(
+          node => !wallpapers.includes(node) && !icons.includes(node)
+        );
+
+        return {
+          wallpaper: wallpapers[0] || others[0] || null,
+          icons: icons.length ? icons : others
+        };
+      }
+
+      function renderLiveStudio() {
+        const assets = previewAssets();
+
+        ui.fileTitle.textContent = "Aurora Live-Studio";
+        ui.filePath.textContent =
+          "Lockscreen, Homescreen, Kontrollzentrum, Benachrichtigungen und AOD";
+
+        const originalUrl = assets.wallpaper
+          ? objectUrl(assets.wallpaper, true)
+          : "";
+
+        const currentUrl = assets.wallpaper
+          ? objectUrl(assets.wallpaper)
+          : "";
+
+        ui.editor.innerHTML = `
+          <div class="studio-stage">
+            <div class="scene-tabs">
+              <button data-scene="lockscreen">🔒 Lockscreen</button>
+              <button data-scene="homescreen">🏡 Homescreen</button>
+              <button data-scene="control">🎛 Kontrollzentrum</button>
+              <button data-scene="notifications">🔔 Benachrichtigungen</button>
+              <button data-scene="aod">🕒 AOD</button>
+            </div>
+
+            <div class="phone-wrap">
+              <div class="phone-glow"></div>
+
+              <div id="previewPhone" class="phone">
+                <div id="phoneScreen" class="phone-screen">
+                  <div
+                    class="wallpaper-layer wallpaper-before"
+                    style="background-image:url('${originalUrl}')"
+                  ></div>
+
+                  <div id="wallpaperAfter" class="wallpaper-layer wallpaper-after">
+                    <div
+                      class="wallpaper-after-inner"
+                      style="background-image:url('${currentUrl}')"
+                    ></div>
+                  </div>
+
+                  <div class="screen-overlay"></div>
+                  <div class="phone-notch"></div>
+
+                  <div class="phone-status">
+                    <span>09:41</span>
+                    <span>▴ Wi-Fi 100%</span>
+                  </div>
+
+                  <div class="scene" data-preview-scene="lockscreen">
+                    <div class="lock-clock">
+                      <div class="lock-time">09:41</div>
+                      <div class="lock-date">Mittwoch, 13. August</div>
+                    </div>
+
+                    <div class="notification-card">
+                      <div class="notification-title">
+                        Aurora Theme Studio
+                      </div>
+                      <div class="notification-text">
+                        Dein Theme wurde erfolgreich aktualisiert.
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="scene" data-preview-scene="homescreen">
+                    <div class="home-clock">09:41</div>
+                    <div class="home-date">Mittwoch, 13. August</div>
+                    <div id="phoneIcons" class="phone-icons"></div>
+                    <div class="phone-dock"></div>
+                  </div>
+
+                  <div class="scene" data-preview-scene="control">
+                    <div class="control-center">
+                      <div class="control-grid">
+                        <div class="control-tile active">
+                          <div class="control-circle">⌁</div>
+                          WLAN
+                        </div>
+                        <div class="control-tile active">
+                          <div class="control-circle">ᛒ</div>
+                          Bluetooth
+                        </div>
+                        <div class="control-tile">
+                          <div class="control-circle">☾</div>
+                          Dunkelmodus
+                        </div>
+                        <div class="control-tile">
+                          <div class="control-circle">✦</div>
+                          Helligkeit
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="scene notifications-scene" data-preview-scene="notifications">
+                    <div class="notification-card">
+                      <div class="notification-title">Nachrichten</div>
+                      <div class="notification-text">
+                        Neue Nachricht im Aurora Studio.
+                      </div>
+                    </div>
+
+                    <div class="notification-card">
+                      <div class="notification-title">Theme Manager</div>
+                      <div class="notification-text">
+                        Wallpaper und Icons wurden aktualisiert.
+                      </div>
+                    </div>
+
+                    <div class="notification-card">
+                      <div class="notification-title">Musik</div>
+                      <div class="notification-text">
+                        Aurora Dreams – Theme Preview
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="scene aod-scene" data-preview-scene="aod">
+                    <div class="aod-content">
+                      <div class="aod-time">09:41</div>
+                      <div class="aod-date">MITTWOCH · 13. AUGUST</div>
+                    </div>
+                  </div>
+
+                  <div class="compare-control">
+                    <span>Vorher</span>
+                    <input
+                      id="phoneCompareSlider"
+                      type="range"
+                      min="0"
+                      max="100"
+                      value="${previewSettings.compare}"
+                    >
+                    <span>Nachher</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+
+        const iconArea = $("#phoneIcons");
+
+        for (const node of assets.icons.slice(0, 12)) {
+          const item = document.createElement("div");
+          item.className = "phone-icon";
+
+          const image = document.createElement("img");
+          image.src = objectUrl(node);
+
+          const label = document.createElement("span");
+          label.textContent = node.name.replace(/\.[^.]+$/, "");
+
+          item.append(image, label);
+          iconArea.append(item);
+        }
+
+        document.querySelectorAll("[data-scene]").forEach(button => {
+          button.classList.toggle(
+            "active",
+            button.dataset.scene === previewSettings.scene
+          );
+
+          button.onclick = () => {
+            previewSettings.scene = button.dataset.scene;
+            applyPreviewSettings();
+          };
+        });
+
+        $("#phoneCompareSlider").oninput = event => {
+          previewSettings.compare = Number(event.target.value);
+          applyPreviewSettings();
+        };
+
+        applyPreviewSettings();
+      }
+
+      function applyPreviewSettings() {
+        const phone = $("#previewPhone");
+        const screen = $("#phoneScreen");
+
+        if (!phone || !screen) return;
+
+        phone.style.setProperty(
+          "--device-radius",
+          previewSettings.radius + "px"
+        );
+
+        screen.style.setProperty(
+          "--clock-size",
+          previewSettings.clockSize + "px"
+        );
+
+        screen.style.setProperty(
+          "--icon-size",
+          previewSettings.iconSize + "px"
+        );
+
+        screen.style.setProperty(
+          "--preview-blur",
+          previewSettings.blur + "px"
+        );
+
+        screen.style.setProperty(
+          "--overlay-opacity",
+          previewSettings.overlay
+        );
+
+        screen.style.setProperty(
+          "--card-radius",
+          previewSettings.cardRadius + "px"
+        );
+
+        screen.style.setProperty(
+          "--compare-width",
+          previewSettings.compare + "%"
+        );
+
+        const rgb = hexToRgb(previewSettings.accent);
+
+        if (rgb) {
+          document.documentElement.style.setProperty(
+            "--accent-rgb",
+            `${rgb.r},${rgb.g},${rgb.b}`
+          );
+          document.documentElement.style.setProperty(
+            "--accent",
+            previewSettings.accent
+          );
+        }
+
+        document.querySelectorAll("[data-preview-scene]").forEach(scene => {
+          scene.classList.toggle(
+            "active",
+            scene.dataset.previewScene === previewSettings.scene
+          );
+        });
+
+        document.querySelectorAll("[data-scene]").forEach(button => {
+          button.classList.toggle(
+            "active",
+            button.dataset.scene === previewSettings.scene
+          );
+        });
+
+        const compareSlider = $("#phoneCompareSlider");
+
+        if (compareSlider) {
+          compareSlider.value = previewSettings.compare;
+        }
+      }
+
+      function hexToRgb(hex) {
+        const match = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+
+        return match
+          ? {
+              r: parseInt(match[1], 16),
+              g: parseInt(match[2], 16),
+              b: parseInt(match[3], 16)
+            }
+          : null;
+      }
+
+      function renderInspector() {
+        if (navigatorMode === "archive") {
+          return;
+        }
+
+        if (!root) {
+          ui.inspectorBody.innerHTML = `
+            <p class="muted">
+              Öffne ein Theme, um Eigenschaften zu bearbeiten.
+            </p>
+          `;
+          return;
+        }
+
+        if (screen === "preview") {
+          renderPreviewInspector();
+        } else if (screen === "file" && selectedNode) {
+          renderFileInspector();
+        } else if (screen === "category") {
+          renderCategoryInspector();
+        } else {
+          renderThemeInspector();
+        }
+      }
+
+      function renderPreviewInspector() {
+        ui.inspectorBody.innerHTML = `
+          <div class="inspector-section">
+            <h3>Vorschau-Ansicht</h3>
+
+            <div class="control-row">
+              <div class="control-label">
+                <span>Ansicht</span>
+              </div>
+
+              <select id="inspectorScene">
+                <option value="lockscreen">Lockscreen</option>
+                <option value="homescreen">Homescreen</option>
+                <option value="control">Kontrollzentrum</option>
+                <option value="notifications">Benachrichtigungen</option>
+                <option value="aod">Always-on-Display</option>
+              </select>
+            </div>
+
+            <div class="control-row">
+              <div class="control-label">
+                <span>Akzentfarbe</span>
+              </div>
+              <input
+                id="inspectorAccent"
+                type="color"
+                value="${previewSettings.accent}"
+              >
+            </div>
+          </div>
+
+          <div class="inspector-section">
+            <h3>Größen und Abstände</h3>
+
+            <div class="control-row">
+              <div class="control-label">
+                <span>Uhrgröße</span>
+                <span id="clockValue">${previewSettings.clockSize}px</span>
+              </div>
+              <input
+                id="clockRange"
+                type="range"
+                min="28"
+                max="82"
+                value="${previewSettings.clockSize}"
+              >
+            </div>
+
+            <div class="control-row">
+              <div class="control-label">
+                <span>Icon-Größe</span>
+                <span id="iconValue">${previewSettings.iconSize}px</span>
+              </div>
+              <input
+                id="iconRange"
+                type="range"
+                min="28"
+                max="62"
+                value="${previewSettings.iconSize}"
+              >
+            </div>
+
+            <div class="control-row">
+              <div class="control-label">
+                <span>Karten-Rundung</span>
+                <span id="cardRadiusValue">${previewSettings.cardRadius}px</span>
+              </div>
+              <input
+                id="cardRadiusRange"
+                type="range"
+                min="0"
+                max="32"
+                value="${previewSettings.cardRadius}"
+              >
+            </div>
+
+            <div class="control-row">
+              <div class="control-label">
+                <span>Geräte-Rundung</span>
+                <span id="deviceRadiusValue">${previewSettings.radius}px</span>
+              </div>
+              <input
+                id="deviceRadiusRange"
+                type="range"
+                min="10"
+                max="50"
+                value="${previewSettings.radius}"
+              >
+            </div>
+          </div>
+
+          <div class="inspector-section">
+            <h3>Wallpaper-Effekte</h3>
+
+            <div class="control-row">
+              <div class="control-label">
+                <span>Unschärfe</span>
+                <span id="blurValue">${previewSettings.blur}px</span>
+              </div>
+              <input
+                id="blurRange"
+                type="range"
+                min="0"
+                max="18"
+                value="${previewSettings.blur}"
+              >
+            </div>
+
+            <div class="control-row">
+              <div class="control-label">
+                <span>Abdunklung</span>
+                <span id="overlayValue">${Math.round(previewSettings.overlay * 100)}%</span>
+              </div>
+              <input
+                id="overlayRange"
+                type="range"
+                min="0"
+                max="70"
+                value="${previewSettings.overlay * 100}"
+              >
+            </div>
+
+            <div class="control-row">
+              <div class="control-label">
+                <span>Before/After</span>
+                <span id="compareValue">${previewSettings.compare}%</span>
+              </div>
+              <input
+                id="compareRange"
+                type="range"
+                min="0"
+                max="100"
+                value="${previewSettings.compare}"
+              >
+            </div>
+          </div>
+
+          <div class="inspector-section">
+            <h3>Schnellzugriff</h3>
+            <div class="editor-toolbar">
+              <button id="inspectorWallpaperButton">
+                Wallpaper
+              </button>
+              <button id="inspectorIconsButton">
+                Icons
+              </button>
+              <button id="inspectorColorsButton">
+                Farben
+              </button>
+            </div>
+          </div>
+        `;
+
+        $("#inspectorScene").value = previewSettings.scene;
+
+        $("#inspectorScene").onchange = event => {
+          previewSettings.scene = event.target.value;
+          applyPreviewSettings();
+        };
+
+        $("#inspectorAccent").oninput = event => {
+          previewSettings.accent = event.target.value;
+          applyPreviewSettings();
+        };
+
+        bindRange("clockRange", "clockValue", "clockSize", "px");
+        bindRange("iconRange", "iconValue", "iconSize", "px");
+        bindRange("cardRadiusRange", "cardRadiusValue", "cardRadius", "px");
+        bindRange("deviceRadiusRange", "deviceRadiusValue", "radius", "px");
+        bindRange("blurRange", "blurValue", "blur", "px");
+
+        $("#overlayRange").oninput = event => {
+          previewSettings.overlay = Number(event.target.value) / 100;
+          $("#overlayValue").textContent = event.target.value + "%";
+          applyPreviewSettings();
+        };
+
+        $("#compareRange").oninput = event => {
+          previewSettings.compare = Number(event.target.value);
+          $("#compareValue").textContent = event.target.value + "%";
+          applyPreviewSettings();
+        };
+
+        $("#inspectorWallpaperButton").onclick =
+          () => openSection("wallpaper");
+
+        $("#inspectorIconsButton").onclick =
+          () => openSection("icon");
+
+        $("#inspectorColorsButton").onclick =
+          () => openSection("colors");
+      }
+
+      function bindRange(inputId, valueId, property, suffix) {
+        $("#" + inputId).oninput = event => {
+          previewSettings[property] = Number(event.target.value);
+          $("#" + valueId).textContent = event.target.value + suffix;
+          applyPreviewSettings();
+        };
+      }
+
+      function renderFileInspector() {
+        const node = selectedNode;
+        const category = categoryOf(node);
+
+        ui.inspectorBody.innerHTML = `
+          <div class="inspector-section">
+            <h3>Datei</h3>
+
+            <div class="control-row">
+              <div class="control-label">
+                <span>Name</span>
+              </div>
+              <input id="inspectorFileName" value="${escapeHtml(node.name)}">
+            </div>
+
+            <div class="control-row">
+              <div class="control-label">
+                <span>Pfad</span>
+              </div>
+              <input value="${escapeHtml(nodePath(node, "/"))}" readonly>
+            </div>
+          </div>
+
+          <div class="inspector-section">
+            <h3>Informationen</h3>
+
+            <div class="control-label">
+              <span>Typ</span>
+              <span>${escapeHtml(category)}</span>
+            </div>
+
+            <div class="control-label">
+              <span>Größe</span>
+              <span>${node.data ? formatBytes(node.data.length) : "—"}</span>
+            </div>
+
+            <div class="control-label">
+              <span>Status</span>
+              <span>${node.modified ? "Geändert" : "Original"}</span>
+            </div>
+          </div>
+
+          <div class="inspector-section">
+            <h3>Aktionen</h3>
+
+            <div class="editor-toolbar">
+              ${
+                node.type === "file"
+                  ? '<button id="inspectorReplaceButton" class="primary">Ersetzen</button>'
+                  : ""
+              }
+              <button id="inspectorDuplicateButton">Duplizieren</button>
+              <button id="inspectorDeleteButton" class="danger">Löschen</button>
+            </div>
+          </div>
+        `;
+
+        $("#inspectorFileName").onchange = event => {
+          const oldName = node.name;
+          const newName = event.target.value.trim();
+
+          if (!newName || newName === oldName) return;
+
+          node.name = newName;
+          markChanged(node);
+
+          addHistory(
+            "Umbenennen",
+            () => node.name = oldName,
+            () => node.name = newName
+          );
+
+          renderAll();
+        };
+
+        if ($("#inspectorReplaceButton")) {
+          $("#inspectorReplaceButton").onclick = () => {
+            replaceTarget = node;
+            ui.replaceInput.click();
+          };
+        }
+
+        $("#inspectorDuplicateButton").onclick = duplicateSelected;
+        $("#inspectorDeleteButton").onclick = deleteSelected;
+      }
+
+      function renderCategoryInspector() {
+        const section = sections.find(item => item.id === activeSection);
+        const nodes = sectionNodes(activeSection);
+
+        ui.inspectorBody.innerHTML = `
+          <div class="inspector-section">
+            <h3>${section?.icon || ""} ${section?.label || activeSection}</h3>
+
+            <div class="control-label">
+              <span>Elemente</span>
+              <span>${nodes.length}</span>
+            </div>
+
+            <div class="control-label">
+              <span>Bilder</span>
+              <span>${nodes.filter(isImage).length}</span>
+            </div>
+
+            <div class="control-label">
+              <span>Archive</span>
+              <span>${nodes.filter(node => node.type === "archive").length}</span>
+            </div>
+          </div>
+
+          <div class="inspector-section">
+            <h3>Komponenten-Aktionen</h3>
+
+            <div class="editor-toolbar">
+              <button id="inspectorAddCategory" class="primary">
+                Dateien hinzufügen
+              </button>
+
+              ${
+                activeSection === "icon"
+                  ? '<button id="inspectorBatchIcons">Icon-Set importieren</button>'
+                  : ""
+              }
+            </div>
+          </div>
+        `;
+
+        $("#inspectorAddCategory").onclick = () => {
+          pendingCategory = activeSection;
+          ui.categoryInput.click();
+        };
+
+        if ($("#inspectorBatchIcons")) {
+          $("#inspectorBatchIcons").onclick =
+            () => ui.batchIconsInput.click();
+        }
+      }
+
+      function renderThemeInspector() {
+        ui.inspectorBody.innerHTML = `
+          <div class="inspector-section">
+            <h3>Theme</h3>
+
+            <div class="control-label">
+              <span>Dateien</span>
+              <span>${root ? countType(root, "file") : 0}</span>
+            </div>
+
+            <div class="control-label">
+              <span>Module</span>
+              <span>${root ? Math.max(0, countType(root, "archive") - 1) : 0}</span>
+            </div>
+
+            <div class="control-label">
+              <span>Bilder</span>
+              <span>${root ? allImages().length : 0}</span>
+            </div>
+          </div>
+
+          <div class="inspector-section">
+            <h3>Schnellzugriff</h3>
+
+            <div class="editor-toolbar">
+              <button id="themeStudioInspector" class="primary">
+                Live-Studio
+              </button>
+              <button id="themeArchiveInspector">
+                Archiv-Ansicht
+              </button>
+            </div>
+          </div>
+        `;
+
+        $("#themeStudioInspector").onclick =
+          () => openSection("preview");
+
+        $("#themeArchiveInspector").onclick =
+          () => setNavigatorMode("archive");
+      }
+
+      function renderCategory() {
+        const section = sections.find(item => item.id === activeSection);
+        const query = ui.navigatorSearch.value.trim().toLowerCase();
+
+        const nodes = sectionNodes(activeSection).filter(node => {
+          return (
+            !query ||
+            nodePath(node, "/").toLowerCase().includes(query)
+          );
+        });
+
+        const images = nodes.filter(isImage);
+        const files = nodes.filter(node => !isImage(node));
+
+        ui.fileTitle.textContent =
+          (section?.icon || "") + " " + (section?.label || activeSection);
+
+        ui.filePath.textContent =
+          nodes.length + " Komponenten in diesem Bereich";
+
+        ui.editor.innerHTML = `
+          <section class="panel">
+            <div class="panel-head">
+              <div class="panel-title">
+                ${section?.label || activeSection}
+              </div>
+              <span class="status-pill">${nodes.length} Elemente</span>
+            </div>
+
+            <div class="panel-body">
+              <div class="editor-toolbar">
+                <button id="categoryAddButton" class="primary">
+                  Dateien hinzufügen
+                </button>
+
+                ${
+                  activeSection === "icon"
+                    ? '<button id="categoryBatchButton">Icon-Set importieren</button>'
+                    : ""
+                }
+
+                ${
+                  ["wallpaper", "icon", "lockscreen", "homescreen", "systemui", "aod"]
+                    .includes(activeSection)
+                    ? '<button id="categoryStudioButton">Im Live-Studio anzeigen</button>'
+                    : ""
+                }
+              </div>
+            </div>
+          </section>
+
+          ${
+            images.length
+              ? `
+                <section class="panel">
+                  <div class="panel-head">
+                    <div class="panel-title">Grafiken</div>
+                  </div>
+                  <div class="panel-body">
+                    <div id="categoryGallery" class="gallery"></div>
+                  </div>
+                </section>
+              `
+              : ""
+          }
+
+          ${
+            files.length
+              ? `
+                <section class="panel">
+                  <div class="panel-head">
+                    <div class="panel-title">Dateien und Module</div>
+                  </div>
+                  <div class="panel-body">
+                    <div id="categoryFiles" class="component-list"></div>
+                  </div>
+                </section>
+              `
+              : ""
+          }
+
+          ${
+            !nodes.length
+              ? `
+                <section class="panel">
+                  <div class="panel-body">
+                    <p class="muted">
+                      Dieser Bereich enthält noch keine Komponenten.
+                    </p>
+                  </div>
+                </section>
+              `
+              : ""
+          }
+        `;
+
+        $("#categoryAddButton").onclick = () => {
+          pendingCategory = activeSection;
+          ui.categoryInput.click();
+        };
+
+        if ($("#categoryBatchButton")) {
+          $("#categoryBatchButton").onclick =
+            () => ui.batchIconsInput.click();
+        }
+
+        if ($("#categoryStudioButton")) {
+          $("#categoryStudioButton").onclick =
+            () => openSection("preview");
+        }
+
+        if (images.length) {
+          renderGallery($("#categoryGallery"), images.slice(0, 400));
+        }
+
+        if (files.length) {
+          renderComponentList($("#categoryFiles"), files.slice(0, 500));
+        }
+      }
+
+      function renderGallery(container, nodes) {
+        for (const node of nodes) {
+          const card = document.createElement("article");
+          card.className = "gallery-card";
+
+          const imageArea = document.createElement("div");
+          imageArea.className = "gallery-image";
+
+          const image = document.createElement("img");
+          image.loading = "lazy";
+          image.src = objectUrl(node);
+          image.alt = node.name;
+
+          imageArea.append(image);
+
+          const info = document.createElement("div");
+          info.className = "gallery-info";
+
+          const name = document.createElement("div");
+          name.className = "gallery-name";
+          name.textContent = node.name;
+
+          const path = document.createElement("div");
+          path.className = "gallery-path";
+          path.textContent = nodePath(node, "/");
+
+          const actions = document.createElement("div");
+          actions.className = "gallery-actions";
+
+          const open = document.createElement("button");
+          open.textContent = "Öffnen";
+          open.onclick = () => selectNode(node);
+
+          const replace = document.createElement("button");
+          replace.textContent = "Ersetzen";
+          replace.onclick = () => {
+            replaceTarget = node;
+            ui.replaceInput.accept = "image/*";
+            ui.replaceInput.click();
+          };
+
+          actions.append(open, replace);
+          info.append(name, path, actions);
+          card.append(imageArea, info);
+          container.append(card);
+        }
+      }
+
+      function renderComponentList(container, nodes) {
+        for (const node of nodes) {
+          const row = document.createElement("div");
+          row.className = "component-row";
+
+          const icon = document.createElement("div");
+          icon.textContent = nodeIcon(node);
+
+          const content = document.createElement("div");
+
+          const name = document.createElement("div");
+          name.className = "component-name";
+          name.textContent = node.name;
+
+          const path = document.createElement("div");
+          path.className = "component-path";
+          path.textContent = nodePath(node, "/");
+
+          content.append(name, path);
+
+          const actions = document.createElement("div");
+          actions.className = "component-actions";
+
+          const open = document.createElement("button");
+          open.className = "small";
+          open.textContent = "Öffnen";
+          open.onclick = () => selectNode(node);
+
+          actions.append(open);
+
+          if (node.type === "file") {
+            const replace = document.createElement("button");
+            replace.className = "small";
+            replace.textContent = "Ersetzen";
+            replace.onclick = () => {
+              replaceTarget = node;
+              ui.replaceInput.click();
+            };
+            actions.append(replace);
+          }
+
+          row.append(icon, content, actions);
+          container.append(row);
+        }
+      }
+
+      function categoryContainer(category) {
+        const map = {
+          wallpaper: ["wallpaper", "folder"],
+          icon: ["icons", "archive"],
+          lockscreen: ["lockscreen", "archive"],
+          homescreen: ["com.miui.home", "archive"],
+          systemui: ["com.android.systemui", "archive"],
+          aod: ["com.miui.aod", "archive"],
+          font: ["fonts", "folder"],
+          sound: ["sounds", "folder"],
+          boot: ["bootanimation", "archive"]
+        };
+
+        const [name, type] = map[category] || ["", "archive"];
+
+        if (!name) return root;
+
+        let container = root.children.find(
+          node =>
+            node.name.toLowerCase() === name.toLowerCase() &&
+            node.type === type
+        );
+
+        if (!container) {
+          container = makeNode({
+            name,
+            type,
+            parent: root,
+            expanded: true,
+            modified: true
+          });
+
+          root.children.push(container);
+          sortChildren(root);
+          markChanged(root);
+        }
+
+        return container;
+      }
+
+      async function importCategoryFiles(files, category) {
+        if (!files.length) return;
+
+        const container = categoryContainer(category);
+        const added = [];
+
+        for (const file of files) {
+          const data = new Uint8Array(await file.arrayBuffer());
+
+          const node = makeNode({
+            name: file.name,
+            type: "file",
+            parent: container,
+            data,
+            originalData: cloneBytes(data),
+            modified: true
+          });
+
+          const old = findChild(container, file.name);
+
+          if (old) {
+            container.children[container.children.indexOf(old)] = node;
+          } else {
+            container.children.push(node);
+          }
+
+          added.push(node);
+        }
+
+        sortChildren(container);
+        markChanged(container);
+
+        addHistory(
+          "Komponenten hinzufügen",
+          () => {
+            container.children = container.children.filter(
+              node => !added.includes(node)
+            );
+          },
+          () => {
+            for (const node of added) {
+              if (!container.children.includes(node)) {
+                container.children.push(node);
+              }
+            }
+            sortChildren(container);
+          }
+        );
+
+        renderAll();
+        toast(files.length + " Datei(en) hinzugefügt.");
+      }
+
+      async function replaceIconSet(files) {
+        const icons = sectionNodes("icon").filter(
+          node => node.type === "file"
+        );
+
+        const container = categoryContainer("icon");
+        const changes = [];
+
+        let replaced = 0;
+        let added = 0;
+
+        for (const file of files) {
+          const data = new Uint8Array(await file.arrayBuffer());
+          const fileName = file.name.toLowerCase();
+          const fileBase = fileName.replace(/\.[^.]+$/, "");
+
+          const match = icons.find(node => {
+            const nodeName = node.name.toLowerCase();
+            const nodeBase = nodeName.replace(/\.[^.]+$/, "");
+
+            return nodeName === fileName || nodeBase === fileBase;
+          });
+
+          if (match) {
+            const oldData = cloneBytes(match.data);
+
+            match.data = cloneBytes(data);
+            match.modified = true;
+
+            changes.push({
+              type: "replace",
+              node: match,
+              oldData,
+              newData: cloneBytes(data)
+            });
+
+            replaced++;
+          } else {
+            const node = makeNode({
+              name: file.name,
+              type: "file",
+              parent: container,
+              data,
+              originalData: cloneBytes(data),
+              modified: true
+            });
+
+            container.children.push(node);
+
+            changes.push({
+              type: "add",
+              parent: container,
+              node
+            });
+
+            added++;
+          }
+        }
+
+        sortChildren(container);
+        markChanged(container);
+
+        addHistory(
+          "Icon-Set importieren",
+          () => {
+            for (const change of changes) {
+              if (change.type === "replace") {
+                change.node.data = cloneBytes(change.oldData);
+              } else {
+                change.parent.children = change.parent.children.filter(
+                  node => node !== change.node
+                );
+              }
+            }
+          },
+          () => {
+            for (const change of changes) {
+              if (change.type === "replace") {
+                change.node.data = cloneBytes(change.newData);
+              } else if (!change.parent.children.includes(change.node)) {
+                change.parent.children.push(change.node);
+              }
+            }
+          }
+        );
+
+        renderAll();
+        toast(`${replaced} Icons ersetzt, ${added} hinzugefügt.`);
+      }
+
+      function scanColors() {
+        const colors = new Map();
+
+        walk(root, node => {
+          if (!isTextNode(node) || node.data.length > 3 * 1024 * 1024) {
+            return;
+          }
+
+          const text = decodeBytes(node.data).text;
+          const matches =
+            text.match(/#[0-9a-fA-F]{6}(?:[0-9a-fA-F]{2})?/g) || [];
+
+          for (const match of matches) {
+            const color = match.toUpperCase();
+
+            if (!colors.has(color)) {
+              colors.set(color, {
+                color,
+                count: 0,
+                nodes: new Set()
+              });
+            }
+
+            const entry = colors.get(color);
+
+            entry.count++;
+            entry.nodes.add(node);
+          }
+        });
+
+        return Array.from(colors.values()).sort(
+          (a, b) => b.count - a.count
+        );
+      }
+
+      function renderColorStudio() {
+        const colors = scanColors();
+
+        ui.fileTitle.textContent = "Theme-Farbstudio";
+        ui.filePath.textContent =
+          "Farben themeweit finden und ersetzen";
+
+        ui.editor.innerHTML = `
+          <section class="panel">
+            <div class="panel-head">
+              <div class="panel-title">Theme-Farben</div>
+              <span class="status-pill">${colors.length} Farben</span>
+            </div>
+
+            <div class="panel-body">
+              <div id="colorGrid" class="color-grid"></div>
+            </div>
+          </section>
+        `;
+
+        const grid = $("#colorGrid");
+
+        if (!colors.length) {
+          grid.innerHTML =
+            '<p class="muted">Keine HEX-Farben gefunden.</p>';
+          return;
+        }
+
+        for (const entry of colors) {
+          const card = document.createElement("div");
+          card.className = "color-card";
+
+          const picker = document.createElement("input");
+          picker.type = "color";
+          picker.value = entry.color.slice(0, 7);
+
+          const info = document.createElement("div");
+
+          const label = document.createElement("strong");
+          label.textContent = entry.color;
+
+          const details = document.createElement("div");
+          details.className = "muted";
+          details.textContent =
+            `${entry.count} Treffer in ${entry.nodes.size} Dateien`;
+
+          const button = document.createElement("button");
+          button.className = "small";
+          button.style.marginTop = "5px";
+          button.textContent = "Themeweit ersetzen";
+
+          button.onclick = () => {
+            replaceGlobally(entry.color, picker.value, false);
+          };
+
+          info.append(label, details, button);
+          card.append(picker, info);
+          grid.append(card);
+        }
+      }
+
+      function nodeType(node) {
+        if (isImage(node)) return "image";
+        if (isAudio(node)) return "audio";
+        if (isFont(node)) return "font";
+
+        if (/\.xml$/i.test(node.name) && isMostlyText(node.data)) {
+          return "xml";
+        }
+
+        if (isTextNode(node)) {
+          const text = decodeBytes(node.data).text.trimStart();
+
+          if (text.startsWith("<?xml") || text.startsWith("<")) {
+            return "xml";
+          }
+
+          return "text";
+        }
+
+        return "binary";
+      }
+
+      function renderSelectedNode() {
+        if (!selectedNode || selectedNode === root) {
+          screen = "dashboard";
+          renderDashboard();
+          return;
+        }
+
+        ui.fileTitle.textContent = selectedNode.name;
+        ui.filePath.textContent = nodePath(selectedNode);
+
+        if (
+          selectedNode.type === "folder" ||
+          selectedNode.type === "archive"
+        ) {
+          renderContainer();
+          return;
+        }
+
+        const type = nodeType(selectedNode);
+
+        if (type === "xml") renderXmlEditor();
+        else if (type === "text") renderTextEditor();
+        else if (type === "image") renderImageEditor();
+        else if (type === "audio") renderAudioEditor();
+        else if (type === "font") renderFontEditor();
+        else renderBinaryEditor();
+      }
+
+      function renderContainer() {
+        const node = selectedNode;
+
+        ui.editor.innerHTML = `
+          <section class="panel">
+            <div class="panel-head">
+              <div class="panel-title">
+                ${node.type === "archive" ? "Archiv/Modul" : "Ordner"}
+              </div>
+              <span class="status-pill">${node.children.length} Elemente</span>
+            </div>
+
+            <div class="panel-body">
+              <div class="dashboard-grid">
+                <div class="dashboard-card" style="--card-rgb:255,106,0">
+                  <h3>Dateien</h3>
+                  <div class="dashboard-value">${countType(node, "file")}</div>
+                </div>
+
+                <div class="dashboard-card" style="--card-rgb:139,92,246">
+                  <h3>Ordner</h3>
+                  <div class="dashboard-value">${countType(node, "folder")}</div>
+                </div>
+
+                <div class="dashboard-card" style="--card-rgb:56,189,248">
+                  <h3>Archive</h3>
+                  <div class="dashboard-value">
+                    ${
+                      countType(node, "archive") -
+                      (node.type === "archive" ? 1 : 0)
+                    }
+                  </div>
+                </div>
+              </div>
+
+              <div class="editor-toolbar" style="margin-top:12px">
+                <button id="containerAddButton" class="primary">
+                  Dateien hinzufügen
+                </button>
+                <button id="containerFolderButton">
+                  Neuer Ordner
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-head">
+              <div class="panel-title">Inhalt</div>
+            </div>
+            <div class="panel-body">
+              <div id="containerList" class="component-list"></div>
+            </div>
+          </section>
+        `;
+
+        renderComponentList($("#containerList"), node.children);
+
+        $("#containerAddButton").onclick =
+          () => ui.addFilesInput.click();
+
+        $("#containerFolderButton").onclick = createFolder;
+      }
+
+      function highlightAttributes(text) {
+        const regex =
+          /([A-Za-z_:][\w:.-]*)(\s*=\s*)("[^"]*"|'[^']*')/g;
+
+        let output = "";
+        let last = 0;
+        let match;
+
+        while ((match = regex.exec(text))) {
+          output += escapeHtml(text.slice(last, match.index));
+
+          output +=
+            `<span class="xml-attr">${escapeHtml(match[1])}</span>` +
+            `<span class="xml-punctuation">${escapeHtml(match[2])}</span>` +
+            `<span class="xml-string">${escapeHtml(match[3])}</span>`;
+
+          last = match.index + match[0].length;
+        }
+
+        return output + escapeHtml(text.slice(last));
+      }
+
+      function highlightXmlToken(token) {
+        if (token.startsWith("<!--")) {
+          return `<span class="xml-comment">${escapeHtml(token)}</span>`;
+        }
+
+        if (
+          token.startsWith("<![CDATA[") ||
+          token.startsWith("<?") ||
+          /^<!DOCTYPE/i.test(token)
+        ) {
+          return `<span class="xml-special">${escapeHtml(token)}</span>`;
+        }
+
+        const match = token.match(
+          /^(<\/?)([A-Za-z_][\w:.-]*)([\s\S]*?)(\/?>)$/
+        );
+
+        if (!match) return escapeHtml(token);
+
+        return (
+          `<span class="xml-punctuation">${escapeHtml(match[1])}</span>` +
+          `<span class="xml-name">${escapeHtml(match[2])}</span>` +
+          highlightAttributes(match[3]) +
+          `<span class="xml-punctuation">${escapeHtml(match[4])}</span>`
+        );
+      }
+
+      function highlightXml(source) {
+        const regex =
+          /<!--[\s\S]*?-->|<!\[CDATA\[[\s\S]*?\]\]>|<\?[\s\S]*?\?>|<!DOCTYPE[\s\S]*?>|<\/?[A-Za-z_][\w:.-]*(?:"[^"]*"|'[^']*'|[^'">])*\/?>/gi;
+
+        let output = "";
+        let last = 0;
+        let match;
+
+        while ((match = regex.exec(source))) {
+          output += escapeHtml(source.slice(last, match.index))
+            .replace(
+              /(&amp;[#A-Za-z0-9]+;)/g,
+              '<span class="xml-entity">$1</span>'
+            );
+
+          output += highlightXmlToken(match[0]);
+          last = match.index + match[0].length;
+        }
+
+        return output + escapeHtml(source.slice(last));
+      }
+
+      function enableTab(textarea) {
+        textarea.addEventListener("keydown", event => {
+          if (event.key !== "Tab") return;
+
+          event.preventDefault();
+
+          const start = textarea.selectionStart;
+          const end = textarea.selectionEnd;
+
+          textarea.value =
+            textarea.value.slice(0, start) +
+            "  " +
+            textarea.value.slice(end);
+
+          textarea.selectionStart =
+            textarea.selectionEnd =
+            start + 2;
+
+          textarea.dispatchEvent(
+            new Event("input", { bubbles: true })
+          );
+        });
+      }
+
+      function renderXmlEditor() {
+        const node = selectedNode;
+        const decoded = decodeBytes(node.data);
+        let committedData = cloneBytes(node.data);
+
+        ui.editor.innerHTML = `
+          <section class="panel">
+            <div class="panel-head">
+              <div class="panel-title">XML-Editor</div>
+              <span id="xmlStatus" class="status-pill">Wird geprüft …</span>
+              <span class="status-pill">${decoded.encoding.toUpperCase()}</span>
+            </div>
+
+            <div class="panel-body">
+              <div class="editor-toolbar">
+                <button id="validateXmlButton">XML prüfen</button>
+                <button id="formatXmlButton">Formatieren</button>
+                <button id="toggleSyntaxButton">Syntaxfarben aus</button>
+              </div>
+
+              <div id="codeShell" class="code-shell">
+                <pre id="codeHighlight" class="code-highlight"></pre>
+                <textarea
+                  id="codeInput"
+                  class="code-input"
+                  spellcheck="false"
+                  autocapitalize="off"
+                ></textarea>
+              </div>
+            </div>
+          </section>
+        `;
+
+        const shell = $("#codeShell");
+        const textarea = $("#codeInput");
+        const highlight = $("#codeHighlight");
+
+        textarea.value = decoded.text;
+
+        function refreshHighlight() {
+          highlight.innerHTML =
+            "<code>" + highlightXml(textarea.value) + "\n</code>";
+
+          highlight.scrollTop = textarea.scrollTop;
+          highlight.scrollLeft = textarea.scrollLeft;
+        }
+
+        function validate() {
+          const result = parseXml(textarea.value);
+          const status = $("#xmlStatus");
+
+          status.className =
+            "status-pill " + (result.error ? "error" : "ok");
+
+          status.textContent =
+            result.error ? "XML-Fehler" : "XML gültig";
+
+          status.title = result.error || "";
+
+          return result;
+        }
+
+        textarea.onscroll = () => {
+          highlight.scrollTop = textarea.scrollTop;
+          highlight.scrollLeft = textarea.scrollLeft;
+        };
+
+        textarea.oninput = () => {
+          refreshHighlight();
+
+          node.data = encodeText(
+            textarea.value,
+            decoded.encoding,
+            decoded.bom
+          );
+
+          markChanged(node);
+
+          clearTimeout(xmlTimer);
+          xmlTimer = setTimeout(validate, 350);
+        };
+
+        textarea.onblur = () => {
+          if (arraysEqual(committedData, node.data)) return;
+
+          const oldData = cloneBytes(committedData);
+          const newData = cloneBytes(node.data);
+
+          addHistory(
+            "XML bearbeiten",
+            () => node.data = cloneBytes(oldData),
+            () => node.data = cloneBytes(newData)
+          );
+
+          committedData = cloneBytes(newData);
+          renderTabs();
+        };
+
+        $("#validateXmlButton").onclick = () => {
+          const result = validate();
+
+          toast(
+            result.error ? "XML enthält Fehler." : "XML ist gültig.",
+            Boolean(result.error)
+          );
+        };
+
+        $("#formatXmlButton").onclick = () => {
+          const result = validate();
+
+          if (result.error) {
+            toast("Fehlerhaftes XML kann nicht formatiert werden.", true);
+            return;
+          }
+
+          textarea.value = formatXml(result.document);
+          textarea.dispatchEvent(new Event("input"));
+        };
+
+        $("#toggleSyntaxButton").onclick = () => {
+          shell.classList.toggle("plain");
+
+          $("#toggleSyntaxButton").textContent =
+            shell.classList.contains("plain")
+              ? "Syntaxfarben an"
+              : "Syntaxfarben aus";
+        };
+
+        enableTab(textarea);
+        refreshHighlight();
+        validate();
+      }
+
+      function formatXml(documentNode) {
+        const serialized =
+          new XMLSerializer().serializeToString(documentNode);
+
+        const tokens = serialized
+          .replace(/>\s*</g, "><")
+          .replace(/</g, "\n<")
+          .trim()
+          .split("\n");
+
+        let depth = 0;
+        const output = [];
+
+        for (const token of tokens) {
+          const trimmed = token.trim();
+
+          if (/^<\//.test(trimmed)) {
+            depth = Math.max(0, depth - 1);
+          }
+
+          output.push("  ".repeat(depth) + trimmed);
+
+          if (
+            /^<[^!?/][^>]*>$/.test(trimmed) &&
+            !/\/>$/.test(trimmed) &&
+            !/<\/[^>]+>$/.test(trimmed)
+          ) {
+            depth++;
+          }
+        }
+
+        return output.join("\n");
+      }
+
+      function renderTextEditor() {
+        const node = selectedNode;
+        const decoded = decodeBytes(node.data);
+        let committedData = cloneBytes(node.data);
+
+        ui.editor.innerHTML = `
+          <section class="panel">
+            <div class="panel-head">
+              <div class="panel-title">Texteditor</div>
+              <span class="status-pill">${decoded.encoding.toUpperCase()}</span>
+              <span class="status-pill">${formatBytes(node.data.length)}</span>
+            </div>
+
+            <div class="panel-body">
+              <textarea
+                id="plainTextEditor"
+                class="plain-editor"
+                spellcheck="false"
+              ></textarea>
+            </div>
+          </section>
+        `;
+
+        const textarea = $("#plainTextEditor");
+        textarea.value = decoded.text;
+
+        textarea.oninput = () => {
+          node.data = encodeText(
+            textarea.value,
+            decoded.encoding,
+            decoded.bom
+          );
+
+          markChanged(node);
+        };
+
+        textarea.onblur = () => {
+          if (arraysEqual(committedData, node.data)) return;
+
+          const oldData = cloneBytes(committedData);
+          const newData = cloneBytes(node.data);
+
+          addHistory(
+            "Text bearbeiten",
+            () => node.data = cloneBytes(oldData),
+            () => node.data = cloneBytes(newData)
+          );
+
+          committedData = cloneBytes(newData);
+          renderTabs();
+        };
+
+        enableTab(textarea);
+      }
+
+      function renderImageEditor() {
+        const node = selectedNode;
+        const original = objectUrl(node, true);
+        const current = objectUrl(node);
+
+        ui.editor.innerHTML = `
+          <section class="panel">
+            <div class="panel-head">
+              <div class="panel-title">Bildeditor mit Before/After</div>
+              <span class="status-pill">${formatBytes(node.data.length)}</span>
+              <span id="imageDimensions" class="status-pill">Abmessungen …</span>
+            </div>
+
+            <div class="panel-body">
+              <div class="editor-toolbar">
+                <button id="replaceImageButton" class="primary">
+                  Bild ersetzen
+                </button>
+                <button id="downloadImageButton">
+                  Herunterladen
+                </button>
+                <button id="restoreImageButton">
+                  Original wiederherstellen
+                </button>
+              </div>
+
+              <div id="imageCompareBox" class="compare-box">
+                <div class="compare-image">
+                  <img id="originalImage" src="${original}" alt="">
+                </div>
+
+                <div id="imageAfter" class="compare-image compare-after">
+                  <img id="editedImage" src="${current}" alt="">
+                </div>
+
+                <div class="compare-slider">
+                  <input
+                    id="imageCompareSlider"
+                    type="range"
+                    min="0"
+                    max="100"
+                    value="50"
+                  >
+                </div>
+              </div>
+            </div>
+          </section>
+        `;
+
+        const editedImage = $("#editedImage");
+
+        editedImage.onload = () => {
+          $("#imageDimensions").textContent =
+            editedImage.naturalWidth +
+            " × " +
+            editedImage.naturalHeight +
+            " px";
+
+          $("#imageCompareBox").style.setProperty(
+            "--compare-box-width",
+            $("#imageCompareBox").clientWidth + "px"
+          );
+        };
+
+        $("#imageCompareSlider").oninput = event => {
+          $("#imageAfter").style.width = event.target.value + "%";
+        };
+
+        $("#replaceImageButton").onclick = () => {
+          replaceTarget = node;
+          ui.replaceInput.accept = "image/*";
+          ui.replaceInput.click();
+        };
+
+        $("#downloadImageButton").onclick = () => {
+          downloadBytes(
+            node.data,
+            node.name,
+            mimeType(node.name, node.data)
+          );
+        };
+
+        $("#restoreImageButton").onclick = () => {
+          if (!node.originalData) {
+            toast("Kein Original verfügbar.");
+            return;
+          }
+
+          const oldData = cloneBytes(node.data);
+          const restored = cloneBytes(node.originalData);
+
+          node.data = restored;
+          markChanged(node);
+
+          addHistory(
+            "Bild wiederherstellen",
+            () => node.data = cloneBytes(oldData),
+            () => node.data = cloneBytes(restored)
+          );
+
+          renderAll();
+        };
+      }
+
+      function renderAudioEditor() {
+        const node = selectedNode;
+        const url = objectUrl(node);
+
+        ui.editor.innerHTML = `
+          <section class="panel">
+            <div class="panel-head">
+              <div class="panel-title">Audio-Editor</div>
+              <span class="status-pill">${formatBytes(node.data.length)}</span>
+            </div>
+
+            <div class="panel-body">
+              <div class="editor-toolbar">
+                <button id="replaceAudioButton" class="primary">
+                  Sound ersetzen
+                </button>
+                <button id="downloadAudioButton">Herunterladen</button>
+              </div>
+
+              <div class="audio-preview">
+                <audio controls preload="metadata" src="${url}"></audio>
+              </div>
+            </div>
+          </section>
+        `;
+
+        $("#replaceAudioButton").onclick = () => {
+          replaceTarget = node;
+          ui.replaceInput.accept = "audio/*";
+          ui.replaceInput.click();
+        };
+
+        $("#downloadAudioButton").onclick = () => {
+          downloadBytes(node.data, node.name, mimeType(node.name, node.data));
+        };
+      }
+
+      async function renderFontEditor() {
+        const node = selectedNode;
+        const url = objectUrl(node);
+        const family = "AuroraFont_" + node.id;
+
+        ui.editor.innerHTML = `
+          <section class="panel">
+            <div class="panel-head">
+              <div class="panel-title">Schriftarten-Editor</div>
+              <span class="status-pill">${formatBytes(node.data.length)}</span>
+            </div>
+
+            <div class="panel-body">
+              <div class="editor-toolbar">
+                <button id="replaceFontButton" class="primary">
+                  Schrift ersetzen
+                </button>
+                <button id="downloadFontButton">Herunterladen</button>
+              </div>
+
+              <div class="font-preview">
+                <input
+                  id="fontSampleInput"
+                  value="Aurora Theme Studio 123 ÄÖÜ"
+                >
+                <div id="fontSample" class="font-sample">
+                  Aurora Theme Studio 123 ÄÖÜ
+                </div>
+              </div>
+            </div>
+          </section>
+        `;
+
+        try {
+          const font = new FontFace(family, `url("${url}")`);
+          await font.load();
+          document.fonts.add(font);
+
+          $("#fontSample").style.fontFamily = `"${family}"`;
+        } catch {
+          $("#fontSample").textContent =
+            "Die Schrift konnte nicht geladen werden.";
+        }
+
+        $("#fontSampleInput").oninput = event => {
+          $("#fontSample").textContent = event.target.value;
+        };
+
+        $("#replaceFontButton").onclick = () => {
+          replaceTarget = node;
+          ui.replaceInput.accept = ".ttf,.otf,.woff,.woff2,.ttc";
+          ui.replaceInput.click();
+        };
+
+        $("#downloadFontButton").onclick = () => {
+          downloadBytes(node.data, node.name, mimeType(node.name, node.data));
+        };
+      }
+
+      function renderBinaryEditor() {
+        const node = selectedNode;
+
+        ui.editor.innerHTML = `
+          <section class="panel">
+            <div class="panel-head">
+              <div class="panel-title">Binärdatei</div>
+              <span class="status-pill">${formatBytes(node.data.length)}</span>
+            </div>
+
+            <div class="panel-body">
+              <div class="editor-toolbar">
+                <button id="replaceBinaryButton" class="primary">
+                  Datei ersetzen
+                </button>
+                <button id="downloadBinaryButton">Herunterladen</button>
+              </div>
+
+              <p class="muted">
+                Die Datei ist binär oder verwendet ein nicht direkt
+                editierbares Android-Format.
+              </p>
+
+              <pre class="hex-view">${escapeHtml(
+                hexDump(node.data, 1024)
+              )}</pre>
+            </div>
+          </section>
+        `;
+
+        $("#replaceBinaryButton").onclick = () => {
+          replaceTarget = node;
+          ui.replaceInput.accept = "";
+          ui.replaceInput.click();
+        };
+
+        $("#downloadBinaryButton").onclick = () => {
+          downloadBytes(node.data, node.name);
+        };
+      }
+
+      function hexDump(bytes, limit) {
+        const data = bytes.slice(0, Math.min(bytes.length, limit));
+        const lines = [];
+
+        for (let offset = 0; offset < data.length; offset += 16) {
+          const chunk = data.slice(offset, offset + 16);
+
+          const hex = Array.from(chunk)
+            .map(byte => byte.toString(16).padStart(2, "0"))
+            .join(" ")
+            .padEnd(47, " ");
+
+          const text = Array.from(chunk)
+            .map(byte =>
+              byte >= 32 && byte <= 126
+                ? String.fromCharCode(byte)
+                : "."
+            )
+            .join("");
+
+          lines.push(
+            offset.toString(16).padStart(8, "0") +
+            "  " + hex + "  |" + text + "|"
+          );
+        }
+
+        return lines.join("\n");
+      }
+
+      async function replaceFile(file) {
+        if (!replaceTarget || !file) return;
+
+        const node = replaceTarget;
+        const oldData = cloneBytes(node.data);
+        const newData = new Uint8Array(await file.arrayBuffer());
+
+        node.data = cloneBytes(newData);
+        markChanged(node);
+
+        addHistory(
+          "Datei ersetzen",
+          () => node.data = cloneBytes(oldData),
+          () => node.data = cloneBytes(newData)
+        );
+
+        replaceTarget = null;
+        ui.replaceInput.value = "";
+
+        renderAll();
+        toast("Datei wurde ersetzt.");
+      }
+
+      function insertContainer() {
+        if (
+          selectedNode?.type === "folder" ||
+          selectedNode?.type === "archive"
+        ) {
+          return selectedNode;
+        }
+
+        return selectedNode?.parent || root;
+      }
+
+      async function addFiles(files) {
+        if (!root || !files.length) return;
+
+        const container = insertContainer();
+        const added = [];
+
+        setBusy(true, "Dateien werden hinzugefügt …");
+
+        try {
+          for (const file of files) {
+            const parts = (file.webkitRelativePath || file.name)
+              .replaceAll("\\", "/")
+              .split("/")
+              .filter(Boolean);
+
+            let parent = container;
+
+            for (const folderName of parts.slice(0, -1)) {
+              parent = ensureFolder(parent, folderName);
+            }
+
+            const data = new Uint8Array(await file.arrayBuffer());
+            let node = null;
+
+            if (isZip(data)) {
+              try {
+                node = await unpackArchive(
+                  parts.at(-1),
+                  data,
+                  parent,
+                  1
+                );
+                node.modified = true;
+              } catch {
+                node = null;
+              }
+            }
+
+            if (!node) {
+              node = makeNode({
+                name: parts.at(-1),
+                type: "file",
+                parent,
+                data,
+                originalData: cloneBytes(data),
+                modified: true
+              });
+            }
+
+            parent.children.push(node);
+            added.push({ parent, node });
+          }
+
+          markChanged(container);
+
+          addHistory(
+            "Dateien hinzufügen",
+            () => {
+              for (const item of added) {
+                item.parent.children = item.parent.children.filter(
+                  node => node !== item.node
+                );
+              }
+            },
+            () => {
+              for (const item of added) {
+                if (!item.parent.children.includes(item.node)) {
+                  item.parent.children.push(item.node);
+                }
+              }
+            }
+          );
+
+          renderAll();
+          toast(files.length + " Datei(en) hinzugefügt.");
+        } finally {
+          setBusy(false);
+        }
+      }
+
+      function createFolder() {
+        const parent = insertContainer();
+        const name = prompt("Ordnername:", "Neuer Ordner");
+
+        if (!name) return;
+
+        const folder = makeNode({
+          name,
+          type: "folder",
+          parent,
+          modified: true
+        });
+
+        parent.children.push(folder);
+        markChanged(parent);
+
+        addHistory(
+          "Ordner erstellen",
+          () => {
+            parent.children = parent.children.filter(
+              node => node !== folder
+            );
+          },
+          () => {
+            if (!parent.children.includes(folder)) {
+              parent.children.push(folder);
+            }
+          }
+        );
+
+        selectNode(folder);
+      }
+
+      function renameSelected() {
+        if (!selectedNode || selectedNode === root) return;
+
+        const node = selectedNode;
+        const oldName = node.name;
+        const newName = prompt("Neuer Name:", oldName);
+
+        if (!newName || newName === oldName) return;
+
+        node.name = newName;
+        markChanged(node);
+
+        addHistory(
+          "Umbenennen",
+          () => node.name = oldName,
+          () => node.name = newName
+        );
+
+        renderAll();
+      }
+
+      function deepCloneNode(node, parent) {
+        const clone = makeNode({
+          name: node.name,
+          type: node.type,
+          parent,
+          data: node.data ? cloneBytes(node.data) : null,
+          originalData: node.originalData
+            ? cloneBytes(node.originalData)
+            : null,
+          modified: true,
+          expanded: node.expanded
+        });
+
+        clone.children = (node.children || []).map(
+          child => deepCloneNode(child, clone)
+        );
+
+        return clone;
+      }
+
+      function duplicateSelected() {
+        if (!selectedNode || selectedNode === root) return;
+
+        const parent = selectedNode.parent;
+        const copy = deepCloneNode(selectedNode, parent);
+
+        const match = selectedNode.name.match(/^(.*?)(\.[^.]+)?$/);
+        const base = match?.[1] || selectedNode.name;
+        const extension = match?.[2] || "";
+
+        let index = 1;
+
+        do {
+          copy.name = `${base}_copy${index}${extension}`;
+          index++;
+        } while (findChild(parent, copy.name));
+
+        parent.children.push(copy);
+        sortChildren(parent);
+        markChanged(parent);
+
+        addHistory(
+          "Duplizieren",
+          () => {
+            parent.children = parent.children.filter(
+              node => node !== copy
+            );
+          },
+          () => {
+            if (!parent.children.includes(copy)) {
+              parent.children.push(copy);
+              sortChildren(parent);
+            }
+          }
+        );
+
+        selectNode(copy);
+      }
+
+      function deleteSelected() {
+        if (!selectedNode || selectedNode === root) return;
+
+        const node = selectedNode;
+
+        if (!confirm(`„${node.name}“ wirklich löschen?`)) return;
+
+        const parent = node.parent;
+        const index = parent.children.indexOf(node);
+
+        parent.children.splice(index, 1);
+        openNodes = openNodes.filter(item => item !== node);
+
+        markChanged(parent);
+
+        addHistory(
+          "Löschen",
+          () => parent.children.splice(index, 0, node),
+          () => {
+            parent.children = parent.children.filter(
+              child => child !== node
+            );
+          }
+        );
+
+        selectedNode = parent;
+        screen = "file";
+
+        renderAll();
+      }
+
+      function countMatches(find, caseSensitive) {
+        let count = 0;
+
+        if (!find) return count;
+
+        walk(root, node => {
+          if (!isTextNode(node)) return;
+
+          const text = decodeBytes(node.data).text;
+          const source = caseSensitive ? text : text.toLowerCase();
+          const search = caseSensitive ? find : find.toLowerCase();
+
+          let position = 0;
+
+          while ((position = source.indexOf(search, position)) >= 0) {
+            count++;
+            position += Math.max(1, search.length);
+          }
+        });
+
+        return count;
+      }
+
+      function replaceGlobally(find, replacement, caseSensitive) {
+        if (!find) return;
+
+        const expression = new RegExp(
+          find.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
+          caseSensitive ? "g" : "gi"
+        );
+
+        const changes = [];
+        let total = 0;
+
+        walk(root, node => {
+          if (!isTextNode(node)) return;
+
+          const decoded = decodeBytes(node.data);
+          let count = 0;
+
+          const text = decoded.text.replace(expression, () => {
+            count++;
+            return replacement;
+          });
+
+          if (!count) return;
+
+          const oldData = cloneBytes(node.data);
+          const newData = encodeText(
+            text,
+            decoded.encoding,
+            decoded.bom
+          );
+
+          node.data = cloneBytes(newData);
+          node.modified = true;
+
+          changes.push({ node, oldData, newData });
+          total += count;
+        });
+
+        if (!changes.length) {
+          toast("Keine Treffer gefunden.");
+          return;
+        }
+
+        markChanged(root);
+
+        addHistory(
+          "Global ersetzen",
+          () => {
+            changes.forEach(change => {
+              change.node.data = cloneBytes(change.oldData);
+            });
+          },
+          () => {
+            changes.forEach(change => {
+              change.node.data = cloneBytes(change.newData);
+            });
+          }
+        );
+
+        renderAll();
+        toast(total + " Treffer wurden ersetzt.");
+      }
+
+      function zipOptions(node) {
+        return {
+          date: node.date || new Date(),
+          compression:
+            node.compression === "STORE"
+              ? "STORE"
+              : "DEFLATE",
+          compressionOptions: { level: 6 }
+        };
+      }
+
+      async function buildArchive(archive, preserveClean = true) {
+        if (
+          preserveClean &&
+          archive.originalData &&
+          !isDirty(archive)
+        ) {
+          return archive.originalData;
+        }
+
+        const zip = new JSZip();
+
+        async function append(container, prefix = "") {
+          for (const child of container.children) {
+            const path = prefix + child.name;
+
+            if (child.type === "folder") {
+              zip.folder(path);
+              await append(child, path + "/");
+            } else if (child.type === "archive") {
+              const data = await buildArchive(child, true);
+              zip.file(path, data, zipOptions(child));
+            } else {
+              zip.file(
+                path,
+                child.data || new Uint8Array(),
+                zipOptions(child)
+              );
+            }
+          }
+        }
+
+        await append(archive);
+
+        return zip.generateAsync(
+          {
+            type: "uint8array",
+            platform: "UNIX",
+            compression: "DEFLATE",
+            compressionOptions: { level: 6 }
+          },
+          progress => {
+            setStatus(
+              "MTZ wird gepackt …",
+              Math.round(progress.percent) + "%"
+            );
+          }
+        );
+      }
+
+      async function saveTheme() {
+        if (!root) return;
+
+        setBusy(true, "MTZ wird erstellt …");
+
+        try {
+          const data = await buildArchive(root, false);
+
+          const name =
+            root.name
+              .replace(/\.(mtz|zip)$/i, "")
+              .replace(/[<>:"/\\|?*\x00-\x1f]/g, "_") +
+            "-aurora-edited.mtz";
+
+          downloadBytes(data, name, "application/octet-stream");
+
+          setStatus("MTZ wurde erstellt.", formatBytes(data.length));
+          toast(name + " wurde gespeichert.");
+        } catch (error) {
+          console.error(error);
+          toast("MTZ konnte nicht erstellt werden.", true);
+        } finally {
+          setBusy(false);
+        }
+      }
+
+      function downloadBytes(
+        bytes,
+        name,
+        type = "application/octet-stream"
+      ) {
+        const blob = new Blob([bytes], { type });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+
+        link.href = url;
+        link.download = name;
+
+        document.body.append(link);
+        link.click();
+        link.remove();
+
+        setTimeout(() => URL.revokeObjectURL(url), 2000);
+      }
+
+      function updateButtons() {
+        const hasTheme = Boolean(root);
+
+        const editable =
+          hasTheme &&
+          selectedNode &&
+          selectedNode !== root &&
+          screen === "file";
+
+        ui.newThemeButton.disabled = busy;
+        ui.openButton.disabled = busy;
+        ui.saveButton.disabled = busy || !hasTheme;
+        ui.undoButton.disabled = busy || !undoStack.length;
+        ui.redoButton.disabled = busy || !redoStack.length;
+        ui.searchButton.disabled = busy || !hasTheme;
+        ui.addFilesButton.disabled = busy || !hasTheme;
+        ui.addFolderButton.disabled = busy || !hasTheme;
+
+        ui.duplicateButton.classList.toggle("hidden", !editable);
+        ui.renameButton.classList.toggle("hidden", !editable);
+        ui.deleteButton.classList.toggle("hidden", !editable);
+
+        ui.replaceButton.classList.toggle(
+          "hidden",
+          !editable || selectedNode?.type !== "file"
+        );
+      }
+
+      ui.newThemeButton.onclick =
+        () => ui.newThemeDialog.showModal();
+
+      ui.openButton.onclick =
+        () => ui.openInput.click();
+
+      ui.saveButton.onclick = saveTheme;
+      ui.undoButton.onclick = undo;
+      ui.redoButton.onclick = redo;
+
+      ui.searchButton.onclick = () => {
+        const find = prompt("Suchtext:");
+
+        if (!find) return;
+
+        const count = countMatches(find, false);
+        const replacement = prompt(
+          `${count} Treffer gefunden.\nErsetzen durch:`,
+          ""
+        );
+
+        if (replacement !== null) {
+          replaceGlobally(find, replacement, false);
+        }
+      };
+
+      ui.addFilesButton.onclick =
+        () => ui.addFilesInput.click();
+
+      ui.addFolderButton.onclick =
+        () => ui.addFolderInput.click();
+
+      ui.studioViewButton.onclick =
+        () => setNavigatorMode("studio");
+
+      ui.archiveViewButton.onclick =
+        () => setNavigatorMode("archive");
+
+      ui.navigatorSearch.oninput = () => {
+        renderNavigator();
+
+        if (screen === "category") {
+          renderContent();
+        }
+      };
+
+      ui.duplicateButton.onclick = duplicateSelected;
+      ui.renameButton.onclick = renameSelected;
+      ui.deleteButton.onclick = deleteSelected;
+
+      ui.replaceButton.onclick = () => {
+        if (selectedNode?.type !== "file") return;
+
+        replaceTarget = selectedNode;
+
+        ui.replaceInput.accept =
+          isImage(selectedNode)
+            ? "image/*"
+            : isAudio(selectedNode)
+              ? "audio/*"
+              : isFont(selectedNode)
+                ? ".ttf,.otf,.woff,.woff2,.ttc"
+                : "";
+
+        ui.replaceInput.click();
+      };
+
+      ui.openInput.onchange = () => {
+        const file = ui.openInput.files?.[0];
+
+        if (file) openTheme(file);
+
+        ui.openInput.value = "";
+      };
+
+      ui.addFilesInput.onchange = () => {
+        addFiles(Array.from(ui.addFilesInput.files || []));
+        ui.addFilesInput.value = "";
+      };
+
+      ui.addFolderInput.onchange = () => {
+        addFiles(Array.from(ui.addFolderInput.files || []));
+        ui.addFolderInput.value = "";
+      };
+
+      ui.replaceInput.onchange = () => {
+        const file = ui.replaceInput.files?.[0];
+
+        if (file) replaceFile(file);
+      };
+
+      ui.categoryInput.onchange = () => {
+        importCategoryFiles(
+          Array.from(ui.categoryInput.files || []),
+          pendingCategory
+        );
+
+        ui.categoryInput.value = "";
+      };
+
+      ui.batchIconsInput.onchange = () => {
+        replaceIconSet(
+          Array.from(ui.batchIconsInput.files || [])
+        );
+
+        ui.batchIconsInput.value = "";
+      };
+
+      $("#newThemeForm").onsubmit = event => {
+        event.preventDefault();
+        createNewTheme();
+      };
+
+      document.querySelectorAll("[data-close]").forEach(button => {
+        button.onclick = () => {
+          document.getElementById(button.dataset.close).close();
+        };
+      });
+
+      document.addEventListener("keydown", event => {
+        const editing = event.target.matches(
+          "input,textarea,[contenteditable=true]"
+        );
+
+        if (
+          (event.ctrlKey || event.metaKey) &&
+          event.key.toLowerCase() === "s"
+        ) {
+          event.preventDefault();
+
+          if (root) saveTheme();
+          return;
+        }
+
+        if (editing) return;
+
+        if (
+          (event.ctrlKey || event.metaKey) &&
+          event.key.toLowerCase() === "z"
+        ) {
+          event.preventDefault();
+          undo();
+        }
+
+        if (
+          (event.ctrlKey || event.metaKey) &&
+          event.key.toLowerCase() === "y"
+        ) {
+          event.preventDefault();
+          redo();
+        }
+      });
+
+      let dragDepth = 0;
+
+      window.addEventListener("dragenter", event => {
+        event.preventDefault();
+        dragDepth++;
+        ui.dropOverlay.classList.add("active");
+      });
+
+      window.addEventListener("dragover", event => {
+        event.preventDefault();
+      });
+
+      window.addEventListener("dragleave", event => {
+        event.preventDefault();
+        dragDepth--;
+
+        if (dragDepth <= 0) {
+          dragDepth = 0;
+          ui.dropOverlay.classList.remove("active");
+        }
+      });
+
+      window.addEventListener("drop", event => {
+        event.preventDefault();
+
+        dragDepth = 0;
+        ui.dropOverlay.classList.remove("active");
+
+        const files = Array.from(event.dataTransfer?.files || []);
+
+        if (!files.length) return;
+
+        const themeFile = files.find(
+          file => /\.(mtz|zip)$/i.test(file.name)
+        );
+
+        if (!root && themeFile) {
+          openTheme(themeFile);
+        } else if (root) {
+          addFiles(files);
+        } else {
+          toast("Bitte eine MTZ- oder ZIP-Datei ablegen.", true);
+        }
+      });
+
+      window.addEventListener("beforeunload", event => {
+        if (root && isDirty(root)) {
+          event.preventDefault();
+          event.returnValue = "";
+        }
+      });
+
+      if (!window.JSZip) {
+        toast(
+          "JSZip konnte nicht geladen werden. Internetverbindung prüfen.",
+          true
+        );
+      }
+
+      renderAll();
+    })();
+  </script>
+</body>
+</html>
